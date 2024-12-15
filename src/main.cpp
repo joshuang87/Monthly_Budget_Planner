@@ -6,6 +6,7 @@ using namespace std;
 
 void CurrentDate();
 void userinput_expenses(vector<vector<double>> &categoryexpenses, const vector<string> &category);
+void editExpCat(vector<string> &categories, vector<vector<double>> &categoryexpenses);
 
 int main() {
 
@@ -176,4 +177,87 @@ void userinput_expenses(vector<vector<double>> &catExpenses, const vector<string
 
     }
 
+}
+
+void editExpCat(vector<string> &categories, vector<vector<double>> &categoryexpenses) {
+    char choice;
+
+    while (true) {
+
+        cout << "\nCategory Management Menu:" << endl;
+        cout << "1. Add a new category" << endl;
+        cout << "2. Remove an existing category" << endl;
+        cout << "3. View current categories" << endl;
+        cout << "4. Exit" << endl;
+        cout << "Enter your choice: ";
+
+        cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); //prevent input buffer issues when use getline() next
+
+        switch (choice) {
+            case '1': { // Add new category
+
+                string newCat;
+                cout << "Enter the name of the new category: ";
+                getline(cin, newCat);
+
+                categories.push_back(newCat);
+                categoryexpenses.push_back(vector<double>()); // Add corresponding empty expense vector
+                cout << "Category '" << newCat << "' added successfully!" << endl;
+                break;
+            }
+
+            case '2': { // Remove category
+
+                if (categories.empty()) {
+                    cout << "No categories to remove." << endl;
+                    break;
+                }
+
+                cout << "\nCurrent Categories:" << endl;
+                for (int i = 0; i < categories.size(); i++) {
+                    cout << i + 1 << ". " << categories[i] << endl;
+                }
+
+                int removeId;
+                cout << "Enter the number of the category to remove: ";
+                cin >> removeId;
+
+                // Validate input
+                if (cin.fail() || removeId < 1 || removeId > categories.size()) {
+                    cin.clear();
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    cout << "Invalid category number." << endl;
+                    break;
+                }
+
+                // Remove category
+                string removeCat = categories[removeId - 1];
+                categories.erase(categories.begin() + (removeId - 1)); //point to the first element in vector + the index
+                categoryexpenses.erase(categoryexpenses.begin() + (removeId - 1)); //categoryexpenses as well
+                cout << "Category '" << removeCat << "' removed successfully!" << endl;
+                break;
+            }
+
+            case '3': {
+                // View all categories
+                if (categories.empty()) {
+                    cout << "No categories exist." << endl;
+                } else {
+                    cout << "\nCurrent Categories:" << endl;
+                    for (int i = 0; i < categories.size(); i++) {
+                        cout << i + 1 << ". " << categories[i] << endl;
+                    }
+                }
+                break;
+            }
+
+            case '4':
+                // Exit
+                return;
+
+            default:
+                cout << "Invalid number" << endl;
+        }
+    }
 }
