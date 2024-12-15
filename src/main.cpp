@@ -2,11 +2,29 @@
 #include <ctime>
 #include <limits>
 #include <vector>
+#include <map>
+#include <iomanip>
+
 using namespace std;
+// Currency structure and global variables
+struct Currency {
+    string symbol;
+    double rate;
+};
+
+map<string, Currency> currencies = {
+    {"MYR", {"RM", 1.0}},
+    {"USD", {"$", 0.21}},
+};
+string currentCurrency = "MYR";
 
 void CurrentDate();
 void userinput_expenses(vector<vector<double>> &categoryexpenses, const vector<string> &category);
 void editExpCat(vector<string> &categories, vector<vector<double>> &categoryexpenses);
+
+void currencySettings();
+void showSummary(const vector<string>& categories, const vector<vector<double>>& expenses);
+void appSettings(vector<string> &categories, vector<vector<double>> &categoryexpenses);
 
 int main() {
 
@@ -57,27 +75,57 @@ int main() {
             break;
 
             case 3:
-            cout<<"havent"<<endl;
+           appSettings(category, categoryexpenses);
             break;
 
             case 4:
+            showSummary(category, categoryexpenses);
             cout<<"Bye!"<<endl;
             break;
         }
 
     } while (choice != 4);
+    
+    return 0;
+} 
+ 
+void appSettings(vector<string> &categories, vector<vector<double>> &categoryexpenses) {
+    while(true) {
+        cout << "\n=== App Settings ===\n"
+             << "1. Edit Categories\n"
+             << "2. Currency Settings\n"
+             << "3. Back to Main Menu\n"
+             << "Enter choice: ";
+        
+        int settingChoice;
+        while (!(cin >> settingChoice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number between 1 and 3: ";
+        }
+        
+        while (settingChoice < 1 || settingChoice > 3) {
+            cout << "Invalid choice. Please enter a number between 1 and 3: ";
+            while (!(cin >> settingChoice)) {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid input. Please enter a number between 1 and 3: ";
+            }
+        }
 
-
-    cout << "\nFinal Expenses Record\n";
-    for (int i = 0; i < category.size(); i++) {
-        cout << "Category: " << category[i] << "\n";
-        for (int j = 0; j < categoryexpenses[i].size(); j++) {
-            cout << "  Expense #" << j + 1 << " : RM " << categoryexpenses[i][j] << endl;
+        switch(settingChoice) {
+            case 1:
+                editExpCat(categories, categoryexpenses);
+                break;
+            case 2:
+                currencySettings();
+                break;
+            case 3:
+                return;
+            default:
+                cout << "Invalid choice\n";
         }
     }
-
-    return 0;
-
 }
 
 void CurrentDate() {
@@ -260,4 +308,69 @@ void editExpCat(vector<string> &categories, vector<vector<double>> &categoryexpe
                 cout << "Invalid number" << endl;
         }
     }
+}
+
+void currencySettings() {
+    while (true) {
+        cout << "\n=== Currency Settings ===\n";
+        cout << "1. View available currencies\n";
+        cout << "2. Change currency\n";
+        cout << "3. Back\n";
+        cout << "Choice: ";
+        
+        int choice;
+        cin >> choice;
+        
+        switch (choice) {
+            case 1: {
+                cout << "\nAvailable Currencies:\n";
+                for (const auto& curr : currencies) {
+                    cout << curr.first << " (" << curr.second.symbol << ")\n";
+                }
+                break;
+            }
+            
+            case 2: {
+                string newCurrency;
+                cout << "Enter currency code (MYR/USD/EUR): ";
+                cin >> newCurrency;
+                
+                if (currencies.find(newCurrency) != currencies.end()) {
+                    currentCurrency = newCurrency;
+                    cout << "Currency changed to " << newCurrency << "\n";
+                } else {
+                    cout << "Invalid currency code\n";
+                }
+                break;
+            }
+            
+            case 3:
+                return;
+                
+            default:
+                cout << "Invalid choice\n";
+        }
+    }
+}
+
+void showSummary(const vector<string>& categories, const vector<vector<double>>& expenses) {
+    cout << "\n=== Expenses Summary ===\n";
+    
+    Currency curr = currencies[currentCurrency];
+    double total = 0;
+    
+    for (size_t i = 0; i < categories.size(); i++) {
+        double catTotal = 0;
+        for (double expense : expenses[i]) {
+            catTotal += expense;
+        }
+        total += catTotal;
+        
+        double converted = catTotal * curr.rate;
+        cout << categories[i] << ": " << curr.symbol 
+             << fixed << setprecision(2) << converted << "\n";
+    }
+    
+    cout << "\nTotal Expenses: " << curr.symbol 
+         << fixed << setprecision(2) << (total * curr.rate) << "\n";
 }
