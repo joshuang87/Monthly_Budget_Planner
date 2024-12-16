@@ -41,7 +41,7 @@ void displayBorder() {
 }
 void displayTitle(const string& title) {
     displayBorder();
-    cout << "|" << setw(20) << "" << title << setw(20) << "|\n";
+    cout << setw(20) << "" << title << setw(20) << "\n";
     displayBorder();
 }
 
