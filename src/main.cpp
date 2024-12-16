@@ -21,9 +21,11 @@ map<string, Currency> currencies = {
 };
 string currentCurrency = "MYR";
 
+// Function declarations
+// Display and UI functions
 void displayBorder();
 void displayTitle(const string& title);
-void displayMainMenu();
+void displayMainMenu(); 
 void displaySettingsMenu();
 
 void CurrentDate();
@@ -35,13 +37,13 @@ void showSummary(const vector<string>& categories, const vector<vector<double>>&
 void appSettings(vector<string> &categories, vector<vector<double>> &categoryexpenses);
 void pressEnterToContinue();
 
-// Utility functions
+// Utility functions for UI
 void displayBorder() {
     cout << "\n+----------------------------------------+\n";
 }
 void displayTitle(const string& title) {
     displayBorder();
-    cout << setfill(' ') << setw(20) << title << endl;
+    cout << " "<< title << endl;
     displayBorder();
 }
 
@@ -60,6 +62,7 @@ void displayMainMenu() {
     cout << "Enter your choice: ";
 }
 
+// Utility function for better user experience
 void pressEnterToContinue() {
     cout << "\nPress Enter to continue...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -70,7 +73,8 @@ int main() {
     int choice;
     vector<string> category = {"Food", "Beverage", "Clothes"};
     vector<vector<double>> categoryexpenses(category.size());
-
+    
+    // Main program loop
     do {
         displayMainMenu();
 
@@ -95,7 +99,7 @@ int main() {
             }
 
         }
-
+        // Process user choice
         switch (choice){
             case 1:
             cout<<"havent"<<endl;
@@ -121,15 +125,16 @@ int main() {
     return 0;
 }
 
+// Gets and displays current system date
 void CurrentDate() {
 
     time_t t = time(0);
     struct tm * now = localtime(&t);
 
     cout << "Current Date: "
-         << (now->tm_year + 1900)
+         << (now->tm_year + 1900)  // Add 1900 to get actual year
          << '-'
-         << (now->tm_mon + 1)
+         << (now->tm_mon + 1)    // Add 1 as months are 0-based
          << '-'
          << now->tm_mday
          << endl;
@@ -147,7 +152,8 @@ void appSettings(vector<string> &categories, vector<vector<double>> &categoryexp
              << "  3. Back to Main Menu\n";
         displayBorder();
         cout << "Enter choice: ";
-        
+
+        // Input validation for settings menu
         int settingChoice;
         while (!(cin >> settingChoice)) {
             cin.clear();
@@ -180,6 +186,7 @@ void appSettings(vector<string> &categories, vector<vector<double>> &categoryexp
     }
 }
 
+// Function to record new expenses
 void userinput_expenses(vector<vector<double>> &catExpenses, const vector<string> &categories) {
     double expense;
     int catChoice;
@@ -370,6 +377,7 @@ void editExpCat(vector<string> &categories, vector<vector<double>> &categoryexpe
     }
 }
 
+// Currency settings management
 void currencySettings() {
     while (true) {
         system("cls");
@@ -416,7 +424,7 @@ void currencySettings() {
                 break;
             }
             
-            case 3:
+            case 3:// Return to previous menu
                 return;
                 
             default:
@@ -432,25 +440,25 @@ void showSummary(const vector<string>& categories, const vector<vector<double>>&
     
     Currency curr = currencies[currentCurrency];
     double total = 0;
-    
+    // Show breakdown by category
     cout << "\nCategory Breakdown:\n";
     displayBorder();
-    
+    // Calculate and display expenses for each category
     for (size_t i = 0; i < categories.size(); i++) {
         double catTotal = 0;
         for (double expense : expenses[i]) {
             catTotal += expense;
         }
-        total += catTotal;
-        
+        total += catTotal; // Add category total to overall total
+        // Convert amount to selected currency
         double converted = catTotal * curr.rate;
         cout << setw(15) << left << categories[i] << ": " 
-             << curr.symbol << fixed << setprecision(2) 
-             << setw(10) << right << converted << "\n";
+             << curr.symbol << fixed << setprecision(2) // - fixed and setprecision(2) shows 2 decimal places
+             << setw(10) << right << converted << "\n";  // - right aligns the amount
     }
     
     displayBorder();
-    cout << setw(15) << left << "Total" << ": " 
+    cout << setw(15) << left << "Total" << ": "  // Display grand total with same formatting as categories
          << curr.symbol << fixed << setprecision(2) 
          << setw(10) << right << (total * curr.rate) << "\n";
     displayBorder();
