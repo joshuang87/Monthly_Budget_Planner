@@ -1,14 +1,13 @@
 #include <iostream>
-#include <ctime>
-#include <limits>
 #include <vector>
 #include <map>
 #include <iomanip>
-#include <stdlib.h>
-
+#include <ctime>
+#include <string>
+#include <limits>
 using namespace std;
 
-// Currency structure and global variables
+// Structure and global variables
 struct Currency {
     string symbol;
     double rate;
@@ -21,445 +20,240 @@ map<string, Currency> currencies = {
 };
 string currentCurrency = "MYR";
 
-// Function declarations
-// Display and UI functions
-void displayBorder();
-void displayTitle(const string& title);
-void displayMainMenu(); 
-void displaySettingsMenu();
+// All function declarations
+void showLine();
+void showDate();
+void showMenu();
+void waitEnter();
+void changeCurrency();
+void editCategories(vector<string>& cats, vector<vector<double>>& expenses);
+void appSettings(vector<string>& cats, vector<vector<double>>& expenses);
+void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
+void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
 
-void CurrentDate();
-void userinput_expenses(vector<vector<double>> &categoryexpenses, const vector<string> &category);
-void editExpCat(vector<string> &categories, vector<vector<double>> &categoryexpenses);
-
-void currencySettings();
-void showSummary(const vector<string>& categories, const vector<vector<double>>& expenses);
-void appSettings(vector<string> &categories, vector<vector<double>> &categoryexpenses);
-void pressEnterToContinue();
-
-// Utility functions for UI
-void displayBorder() {
-    cout << "\n+----------------------------------------+\n";
-}
-void displayTitle(const string& title) {
-    displayBorder();
-    cout << " "<< title << endl;
-    displayBorder();
+// Function implementations
+void showLine() {
+    cout << "----------------------------------------" << endl;
 }
 
-void displayMainMenu() {
-    system("cls"); // Windows: use "cls", Linux/Mac: use "clear"
-    displayTitle("Monthly Budget Planner");
-    cout << "\nCurrent ";
-    CurrentDate();
-    cout << "\nPlease select an option:\n";
-    displayBorder();
-    cout << "  1. Set Budget\n"
-         << "  2. Make Expenses Record\n"
-         << "  3. App Setting\n"
-         << "  4. Exit\n";
-    displayBorder();
+void showDate() {
+    time_t t = time(0);
+    tm* now = localtime(&t);
+    cout << "Current Date: ";
+    cout << (now->tm_year + 1900) << '-';
+    cout << (now->tm_mon + 1) << '-';
+    cout << now->tm_mday << endl;
+}
+
+void showMenu() {
+    system("cls");
+    cout << endl << "Monthly Budget Planner" << endl;
+    showLine();
+    cout << "Current ";
+    showDate();
+    showLine();
+    cout << "1. Set Budget" << endl;
+    cout << "2. Make Expenses Record" << endl;
+    cout << "3. App Setting" << endl;
+    cout << "4. Exit" << endl;
+    showLine();
     cout << "Enter your choice: ";
 }
 
-// Utility function for better user experience
-void pressEnterToContinue() {
-    cout << "\nPress Enter to continue...";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+void waitEnter() {
+    cout << endl << "Press Enter to continue...";
+    cin.ignore();
     cin.get();
 }
 
-int main() {
-    int choice;
-    vector<string> category = {"Food", "Beverage", "Clothes"};
-    vector<vector<double>> categoryexpenses(category.size());
+void changeCurrency() {
+    system("cls");
+    cout << endl << "Change Currency" << endl;
+    showLine();
     
-    // Main program loop
-    do {
-        displayMainMenu();
+    cout << "Available currencies:" << endl;
+    for (const auto& curr : currencies) {
+        cout << curr.first << " (" << curr.second.symbol << ")" << endl;
+    }
+    
+    cout << endl << "Enter currency code (MYR/USD/EUR): ";
+    string newCurrency;
+    cin >> newCurrency;
+    
+    if (currencies.find(newCurrency) != currencies.end()) {
+        currentCurrency = newCurrency;
+        cout << "Currency changed to " << newCurrency << endl;
+    } else {
+        cout << "Invalid currency code" << endl;
+    }
+    waitEnter();
+}
 
-         while (!(cin >> choice)) {
-
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number between 1 and 4: ";
-
+void editCategories(vector<string>& cats, vector<vector<double>>& expenses) {
+    while (true) {
+        system("cls");
+        cout << endl << "Edit Categories" << endl;
+        showLine();
+        
+        cout << "Current Categories:" << endl;
+        for (int i = 0; i < cats.size(); i++) {
+            cout << i + 1 << ". " << cats[i] << endl;
         }
+        
+        showLine();
+        cout << "1. Add category" << endl;
+        cout << "2. Remove category" << endl;
+        cout << "3. Back" << endl;
+        showLine();
+        cout << "Choice: ";
+        
+        int choice;
+        cin >> choice;
+        cin.ignore();
 
-        while (choice < 1 || choice > 4) {
-
-            cout << "Invalid choice. Please enter a number between 1 and 4: ";
-
-            while (!(cin >> choice)) {
-
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input. Please enter a number between 1 and 4: ";
-
+        if (choice == 1) {
+            string newCat;
+            cout << "Enter new category name: ";
+            getline(cin, newCat);
+            cats.push_back(newCat);
+            expenses.push_back(vector<double>());
+            cout << "Category added!" << endl;
+        }
+        else if (choice == 2) {
+            if (cats.size() > 1) {
+                int num;
+                cout << "Enter category number to remove: ";
+                cin >> num;
+                if (num >= 1 && num <= cats.size()) {
+                    cats.erase(cats.begin() + num - 1);
+                    expenses.erase(expenses.begin() + num - 1);
+                    cout << "Category removed!" << endl;
+                }
+            } else {
+                cout << "Cannot remove - need at least one category!" << endl;
             }
-
         }
-        // Process user choice
-        switch (choice){
-            case 1:
-            cout<<"havent"<<endl;
-            pressEnterToContinue();
-            break;
-
-            case 2:
-            userinput_expenses(categoryexpenses, category);
-            break;
-
-            case 3:
-           appSettings(category, categoryexpenses);
-            break;
-
-            case 4:
-            showSummary(category, categoryexpenses);
-            cout<<"Bye!"<<endl;
+        else if (choice == 3) {
             break;
         }
-
-    } while (choice != 4);
-    
-    return 0;
+        waitEnter();
+    }
 }
 
-// Gets and displays current system date
-void CurrentDate() {
-
-    time_t t = time(0);
-    struct tm * now = localtime(&t);
-
-    cout << "Current Date: "
-         << (now->tm_year + 1900)  // Add 1900 to get actual year
-         << '-'
-         << (now->tm_mon + 1)    // Add 1 as months are 0-based
-         << '-'
-         << now->tm_mday
-         << endl;
-
-}
-
-void appSettings(vector<string> &categories, vector<vector<double>> &categoryexpenses) {
+void appSettings(vector<string>& cats, vector<vector<double>>& expenses) {
     while(true) {
         system("cls");
-        displayTitle("App Settings");
-        cout << "\nPlease select an option:\n";
-        displayBorder();
-        cout << "  1. Edit Categories\n"
-             << "  2. Currency Settings\n"
-             << "  3. Back to Main Menu\n";
-        displayBorder();
-        cout << "Enter choice: ";
-
-        // Input validation for settings menu
-        int settingChoice;
-        while (!(cin >> settingChoice)) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid input. Please enter a number between 1 and 3: ";
-        }
-        
-        while (settingChoice < 1 || settingChoice > 3) {
-            cout << "Invalid choice. Please enter a number between 1 and 3: ";
-            while (!(cin >> settingChoice)) {
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input. Please enter a number between 1 and 3: ";
-            }
-        }
-
-        switch(settingChoice) {
-            case 1:
-                editExpCat(categories, categoryexpenses);
-                break;
-            case 2:
-                currencySettings();
-                break;
-            case 3:
-                return;
-            default:
-                cout << "Invalid choice\n";
-                pressEnterToContinue();
-        }
-    }
-}
-
-// Function to record new expenses
-void userinput_expenses(vector<vector<double>> &catExpenses, const vector<string> &categories) {
-    double expense;
-    int catChoice;
-    char option;
-
-    while (true) {
-        system("cls");
-        displayTitle("Record Expenses");
-        cout << "Choose a category: " << endl;
-        for (int i = 0; i < categories.size(); i++) {
-            cout << i + 1 << ". " << categories[i] << endl;
-        }
-        displayBorder();
-
-        cout << "Enter a number to choose the category: ";
-        while (!(cin>>catChoice) || catChoice < 1 || catChoice > categories.size()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Invalid choice. Please enter a valid category number: ";
-
-        }
-
-        cout<<"\nSelected  category: "<<categories[catChoice-1]<<endl;
-        cout<<"Do you confirm want proceed to this category? (y to confirm, n to choose again): ";
-        while(true){
-            cin>>option;
-            if(option=='y'||option=='Y'){
-                break;
-            }else if (option=='n'||option=='N'){
-                cout<<"Go back to the category selection menu\n";
-                goto categorySelection;
-            }else{
-                cout<<"Invalid input. Please enter (y/n)";
-            }
-        }
-
-
-        cout << "Enter expense amount: ";
-
-        while (!(cin>>expense)||expense<0) {
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout << "Invalid input. Please enter a valid number of expenses: ";
-        }
-
-
-        catExpenses[catChoice - 1].push_back(expense);
-
-
-        while (true){
-            cout << "\nAdd another expenses? (y/n): ";
-            cin >> option;
-
-            if (cin.fail() ||(option!='y'&&option!='Y'&&option!='n'&&option!='N')){
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cout<<"Invalid input. Please enter (y/n)."<<endl;
-                continue;
-            }
-
-            if(option=='y'||option=='Y'){
-                break;
-            }else if(option=='n'||option=='N'){
-
-                displayTitle("Current Expenses Record");
-                Currency curr = currencies[currentCurrency];
-                for(int i=0; i<categories.size();i++) {
-                    if(catExpenses[i].size() > 0) {
-
-                       cout<<"\n Current Expenses Record\n";
-                       displayBorder();
-                       for(int j=0; j<catExpenses[i].size();j++){
-                       
-                            double converted = catExpenses[i][j] * curr.rate;
-                            cout << "  Expense " << j+1 << ": " << curr.symbol 
-                                 << fixed << setprecision(2) << converted << endl;
-                        }
-                    }
-                }
-                pressEnterToContinue();
-                return;
-            } else {
-                cout<<"Invalid input. Please enter (y/n): ";
-            }
-        }    
-    categorySelection:
-        continue;
-
-    }
-
-}
-
-void editExpCat(vector<string> &categories, vector<vector<double>> &categoryexpenses) {
-    char choice;
-
-    while (true) {
-        system("cls");
-        displayTitle("Category Management");
-        cout << "\nPlease select an option:\n";
-        displayBorder();
-
-        cout << "\nCategory Management Menu:" << endl;
-        cout << "1. Add a new category" << endl;
-        cout << "2. Remove an existing category" << endl;
-        cout << "3. View current categories" << endl;
-        cout << "4. Back" << endl;
-        
-        displayBorder();
-        cout << "Enter your choice: ";
-
-        cin >> choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); //prevent input buffer issues when use getline() next
-
-        switch (choice) {
-            case '1': { // Add new category
-
-                string newCat;
-                cout << "Enter the name of the new category: ";
-                getline(cin, newCat);
-
-                categories.push_back(newCat);
-                categoryexpenses.push_back(vector<double>()); // Add corresponding empty expense vector
-                cout << "Category '" << newCat << "' added successfully!" << endl;
-                pressEnterToContinue();
-                break;
-            }
-
-            case '2': { // Remove category
-
-                if (categories.empty()) {
-                    cout << "No categories to remove." << endl;
-                    pressEnterToContinue();
-                    break;
-                }
-                
-                displayTitle("Remove Category");
-                cout << "\nCurrent Categories:\n";
-                displayBorder();
-                for (int i = 0; i < categories.size(); i++) {
-                    cout << i + 1 << ". " << categories[i] << endl;
-                }
-                displayBorder();
-
-                int removeId;
-                cout << "Enter the number of the category to remove: ";
-                cin >> removeId;
-
-                // Validate input
-                if (cin.fail() || removeId < 1 || removeId > categories.size()) {
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << "Invalid category number." << endl;
-                    pressEnterToContinue();
-                    break;
-                }
-
-                // Remove category
-                string removeCat = categories[removeId - 1];
-                categories.erase(categories.begin() + (removeId - 1)); //point to the first element in vector + the index
-                categoryexpenses.erase(categoryexpenses.begin() + (removeId - 1)); //categoryexpenses as well
-                cout << "Category '" << removeCat << "' removed successfully!" << endl;
-                pressEnterToContinue();
-                break;
-            }
-
-            case '3': {
-                // View all categories
-                if (categories.empty()) {
-                    cout << "No categories exist." << endl;
-                } else {
-                    cout << "\nCurrent Categories:" << endl;
-                    for (int i = 0; i < categories.size(); i++) {
-                        cout << i + 1 << ". " << categories[i] << endl;
-                    }
-                }
-                pressEnterToContinue();
-                break;
-            }
-
-            case '4':
-                // Exit
-                return;
-
-            default:
-                cout << "Invalid number" << endl;
-                pressEnterToContinue();
-        }
-    }
-}
-
-// Currency settings management
-void currencySettings() {
-    while (true) {
-        system("cls");
-        displayTitle("Currency Settings");
-        cout << "\nPlease select an option:\n";
-        displayBorder();
-        cout << "  1. View available currencies\n"
-             << "  2. Change currency\n"
-             << "  3. Back\n";
-        displayBorder();
+        cout << endl << "App Settings" << endl;
+        showLine();
+        cout << "1. Edit Categories" << endl;
+        cout << "2. Change Currency" << endl;
+        cout << "3. Back" << endl;
+        showLine();
         cout << "Choice: ";
         
         int choice;
         cin >> choice;
         
-        switch (choice) {
-            case 1: {
-                displayTitle("Available Currencies");
-                for (const auto& curr : currencies) {
-                    cout << "  " << curr.first << " (" << curr.second.symbol << ")\n";
-                }
-                pressEnterToContinue();
-                break;
-            }
-            
-            case 2: {
-                displayBorder();
-                cout << "Enter currency code (";
-                for (const auto& curr : currencies) {
-                    cout << curr.first << "/";
-                }
-                cout << "\b): ";
-                
-                string newCurrency;
-                cin >> newCurrency;
-                
-                if (currencies.find(newCurrency) != currencies.end()) {
-                    currentCurrency = newCurrency;
-                    cout << "\nCurrency changed to " << newCurrency;
-                } else {
-                    cout << "\nInvalid currency code";
-                }
-                pressEnterToContinue();
-                break;
-            }
-            
-            case 3:// Return to previous menu
-                return;
-                
-            default:
-                cout << "\nInvalid choice";
-                pressEnterToContinue();
+        if (choice == 1) {
+            editCategories(cats, expenses);
+        }
+        else if (choice == 2) {
+            changeCurrency();
+        }
+        else if (choice == 3) {
+            break;
         }
     }
 }
 
-void showSummary(const vector<string>& categories, const vector<vector<double>>& expenses) {
+void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
+    char addMore;
+    do {
+        system("cls");
+        cout << endl << "Record Expenses" << endl;
+        showLine();
+        
+        cout << "Categories:" << endl;
+        for (int i = 0; i < cats.size(); i++) {
+            cout << i + 1 << ". " << cats[i] << endl;
+        }
+        showLine();
+        
+        int catNum;
+        cout << "Enter category number: ";
+        cin >> catNum;
+        
+        while (catNum < 1 || catNum > cats.size()) {
+            cout << "Invalid! Enter again: ";
+            cin >> catNum;
+        }
+
+        Currency curr = currencies[currentCurrency];
+        double amount;
+        cout << "Enter amount " << curr.symbol << " ";
+        cin >> amount;
+        
+        while (amount < 0) {
+            cout << "Invalid! Enter again " << curr.symbol << " ";
+            cin >> amount;
+        }
+
+        expenses[catNum - 1].push_back(amount / curr.rate);
+        
+        cout << endl << "Add another? (y/n): ";
+        cin >> addMore;
+    } while (addMore == 'y' || addMore == 'Y');
+}
+
+void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses) {
     system("cls");
-    displayTitle("Expenses Summary");
+    cout << endl << "Expenses Summary" << endl;
+    showLine();
     
     Currency curr = currencies[currentCurrency];
     double total = 0;
-    // Show breakdown by category
-    cout << "\nCategory Breakdown:\n";
-    displayBorder();
-    // Calculate and display expenses for each category
-    for (size_t i = 0; i < categories.size(); i++) {
+
+    for (int i = 0; i < cats.size(); i++) {
         double catTotal = 0;
-        for (double expense : expenses[i]) {
-            catTotal += expense;
+        for (double exp : expenses[i]) {
+            catTotal += exp;
         }
-        total += catTotal; // Add category total to overall total
-        // Convert amount to selected currency
-        double converted = catTotal * curr.rate;
-        cout << setw(15) << left << categories[i] << ": " 
-             << curr.symbol << fixed << setprecision(2) // - fixed and setprecision(2) shows 2 decimal places
-             << setw(10) << right << converted << "\n";  // - right aligns the amount
+        total += catTotal;
+        
+        cout << cats[i] << ": " << curr.symbol 
+             << fixed << setprecision(2) << (catTotal * curr.rate) << endl;
     }
     
-    displayBorder();
-    cout << setw(15) << left << "Total" << ": "  // Display grand total with same formatting as categories
-         << curr.symbol << fixed << setprecision(2) 
-         << setw(10) << right << (total * curr.rate) << "\n";
-    displayBorder();
+    showLine();
+    cout << "Total: " << curr.symbol 
+         << fixed << setprecision(2) << (total * curr.rate) << endl;
+}
+
+int main() {
+    vector<string> categories = {"Food", "Beverage", "Clothes"};
+    vector<vector<double>> expenses(categories.size());
+    int choice;
+    
+    do {
+        showMenu();
+        cin >> choice;
+        
+        if (choice == 1) {
+            cout << "havent" << endl;
+            waitEnter();
+        }
+        else if (choice == 2) {
+            addExpense(expenses, categories);
+        }
+        else if (choice == 3) {
+            appSettings(categories, expenses);
+        }
+        else if (choice == 4) {
+            showSummary(categories, expenses);
+            cout << endl << "Goodbye!" << endl;
+        }
+        
+    } while (choice != 4);
+    
+    return 0;
 }
