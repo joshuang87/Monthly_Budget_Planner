@@ -12,26 +12,26 @@ struct Currency {
     string symbol;
     double rate;
 };
-
 map<string, Currency> currencies = {
-    {"MYR", {"RM", 1.0}},
-    {"USD", {"$", 0.21}},
-    {"EUR", {"€", 0.19}}
+    {"MYR", {"RM", 1.0}},          //malaysia ringgit
+    {"USD", {"$", 0.21}},          //Us Dollar
+    {"EUR", {"€", 0.19}}           // Euro
 };
 string currentCurrency = "MYR";
+double budget = 0;  // Added budget variable
 
-// All function declarations
+// Function declarations
 void showLine();
 void showDate();
 void showMenu();
 void waitEnter();
 void changeCurrency();
+void setBudget();
 void editCategories(vector<string>& cats, vector<vector<double>>& expenses);
 void appSettings(vector<string>& cats, vector<vector<double>>& expenses);
 void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
 
-// Function implementations
 void showLine() {
     cout << "----------------------------------------" << endl;
 }
@@ -64,6 +64,24 @@ void waitEnter() {
     cout << endl << "Press Enter to continue...";
     cin.ignore();
     cin.get();
+}
+
+void setBudget() {
+    system("cls");
+    cout << endl << "Set Budget" << endl;
+    showLine();
+    
+    Currency curr = currencies[currentCurrency];
+    cout << "Enter budget amount " << curr.symbol << " ";
+    cin >> budget;
+    
+    while (budget <= 0) {
+        cout << "Invalid! Enter again " << curr.symbol << " ";
+        cin >> budget;
+    }
+    
+    cout << "Budget set to " << curr.symbol << fixed << setprecision(2) << budget << endl;
+    waitEnter();
 }
 
 void changeCurrency() {
@@ -198,6 +216,26 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
             cin >> amount;
         }
 
+        // Calculate total expenses including new amount
+        double totalExpense = amount / curr.rate;
+        for (const auto& catExp : expenses) {
+            for (double exp : catExp) {
+                totalExpense += exp;
+            }
+        }
+
+        // Budget warning check
+        if (budget > 0 && (totalExpense * curr.rate) > budget) {
+            cout << "\nWARNING: This expense will exceed your budget of "
+                 << curr.symbol << fixed << setprecision(2) << budget << "!\n";
+            cout << "Do you want to continue? (y/n): ";
+            char confirm;
+            cin >> confirm;
+            if (confirm != 'y' && confirm != 'Y') {
+                continue;
+            }
+        }
+
         expenses[catNum - 1].push_back(amount / curr.rate);
         
         cout << endl << "Add another? (y/n): ";
@@ -221,12 +259,18 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
         total += catTotal;
         
         cout << cats[i] << ": " << curr.symbol 
-             << fixed << setprecision(2) << (catTotal * curr.rate) << endl;
+             << setprecision(2) << (catTotal * curr.rate) << endl;
     }
     
     showLine();
     cout << "Total: " << curr.symbol 
-         << fixed << setprecision(2) << (total * curr.rate) << endl;
+         << setprecision(2) << (total * curr.rate) << endl;
+    
+    if (budget > 0) {
+        cout << "Budget: " << curr.symbol << setprecision(2) << budget << endl;
+        double remaining = budget - (total * curr.rate);
+        cout << "Remaining: " << curr.symbol << setprecision(2) << remaining << endl;
+    }
 }
 
 int main() {
@@ -239,8 +283,7 @@ int main() {
         cin >> choice;
         
         if (choice == 1) {
-            cout << "havent" << endl;
-            waitEnter();
+            setBudget();
         }
         else if (choice == 2) {
             addExpense(expenses, categories);
