@@ -341,6 +341,13 @@ string json_to_str(string path) {
     return data;
 }
 
+void save_as_json(string data) {
+    ofstream file;
+    file.open("data/Months.json");
+    file << data;
+    file.close();
+}
+
 int main() {
     vector<string> categories = {"Food", "Beverage", "Clothes"};
     vector<vector<double>> expenses(categories.size());
