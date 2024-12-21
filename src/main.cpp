@@ -50,9 +50,13 @@ void showLine() {
     cout << "----------------------------------------" << endl;
 }
 
-void showDate() {
+tm* get_current_date() {
     time_t t = time(0);
-    tm* now = localtime(&t);
+    return localtime(&t);
+}
+
+void showDate() {
+    tm* now = get_current_date();
     cout << "Current Date: ";
     cout << (now->tm_year + 1900) << '-';
     cout << (now->tm_mon + 1) << '-';
@@ -349,6 +353,10 @@ void save_as_json(string data) {
 }
 
 int main() {
+    tm* current_date = get_current_date();
+    const int month = current_date->tm_mon + 1;
+    const int year = current_date->tm_year + 1900;
+
     vector<string> categories = {"Food", "Beverage", "Clothes"};
     vector<vector<double>> expenses(categories.size());
     int choice;
