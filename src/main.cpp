@@ -12,11 +12,25 @@ struct Currency {
     string symbol;
     double rate;
 };
+
 map<string, Currency> currencies = {
     {"MYR", {"RM", 1.0}},          //malaysia ringgit
     {"USD", {"$", 0.21}},          //Us Dollar
     {"EUR", {"€", 0.19}}           // Euro
 };
+
+struct Month {
+    // Value of month
+    int value;
+    int year;
+    double budget;
+    
+    // Overloaded != operator for Month struct 
+    bool operator!=(const Month& other) const {
+        return value != other.value || year != other.year || budget != other.budget;
+    }
+};
+
 string currentCurrency = "MYR";
 double budget = 0;  // Added budget variable
 
