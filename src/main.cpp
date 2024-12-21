@@ -304,6 +304,32 @@ string to_json_str(const vector<Month>& months) {
     return str_data;
 }
 
+vector<Month> parse_json(const string& data) {
+    vector<Month> months;
+    stringstream ss(data);
+    string line;
+
+    while (getline(ss, line, '{')) {
+        if (line.find("month") == string::npos) continue;
+
+        Month m;
+        size_t pos;
+
+        pos = line.find("month");
+        m.value = stoi(line.substr(pos + 7, line.find(",", pos) - pos - 7));
+
+        pos = line.find("year");
+        m.year = stoi(line.substr(pos + 6, line.find(",", pos) - pos - 6));
+
+        pos = line.find("budget");
+        m.budget = stod(line.substr(pos + 8, line.find("}", pos) - pos - 8));
+
+        months.push_back(m);
+    }
+
+    return months;
+}
+
 int main() {
     vector<string> categories = {"Food", "Beverage", "Clothes"};
     vector<vector<double>> expenses(categories.size());
