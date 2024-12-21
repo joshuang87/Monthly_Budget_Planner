@@ -287,6 +287,23 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
     }
 }
 
+string to_json_str(const vector<Month>& months) {
+    string str_data = "[";
+    for (auto month : months) {
+        str_data += "{";
+        str_data += "\"month\": " + to_string(month.value) + ",";
+        str_data += "\"year\": " + to_string(month.year) + ",";
+        str_data += "\"budget\": " + to_string(month.budget);
+        if (month != months.back()) {
+            str_data += "},";
+        } else {
+            str_data += "}";
+        }
+    }
+    str_data += "]";
+    return str_data;
+}
+
 int main() {
     vector<string> categories = {"Food", "Beverage", "Clothes"};
     vector<vector<double>> expenses(categories.size());
