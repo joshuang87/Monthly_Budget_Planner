@@ -5,6 +5,9 @@
 #include <ctime>
 #include <string>
 #include <limits>
+#include <filesystem>
+#include <fstream>
+
 using namespace std;
 
 // Structure and global variables
@@ -40,11 +43,15 @@ void showDate();
 void showMenu();
 void waitEnter();
 void changeCurrency();
-void setBudget();
+void setBudget(int, int);
 void editCategories(vector<string>& cats, vector<vector<double>>& expenses);
 void appSettings(vector<string>& cats, vector<vector<double>>& expenses);
 void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
+string to_json_str(const vector<Month>&);
+vector<Month> parse_json(const string&);
+void save_as_json(string);
+string json_to_str(string);
 
 void showLine() {
     cout << "----------------------------------------" << endl;
@@ -84,22 +91,42 @@ void waitEnter() {
     cin.get();
 }
 
-void setBudget() {
+void setBudget(int month, int year) {
     system("cls");
-    cout << endl << "Set Budget" << endl;
-    showLine();
-    
-    Currency curr = currencies[currentCurrency];
-    cout << "Enter budget amount " << curr.symbol << " ";
-    cin >> budget;
-    
-    while (budget <= 0) {
-        cout << "Invalid! Enter again " << curr.symbol << " ";
-        cin >> budget;
+    if (filesystem::exists("data/Months.json")) {
+        vector<Month> months = parse_json(json_to_str("data/Months.json"));
+        for (Month x : months) {
+            if (x.value == month && x.year == year) {
+                cout << "Budget for this month is already set to " << currentCurrency << fixed << setprecision(2) << x.budget << endl;
+                waitEnter();
+                return;
+            }
+            else {
+                int v, y;
+                double budget;
+                cout << "Enter month: ";
+                cin >> v;
+                cout << "Enter year: ";
+                cin >> y;
+                cout << "Enter budget: ";
+                cin >> budget;
+                months.push_back({v, y, budget});
+            }
+        }
     }
-    
-    cout << "Budget set to " << curr.symbol << fixed << setprecision(2) << budget << endl;
-    waitEnter();
+    else {
+        int v, y;
+        double budget;
+        cout << "Enter month: ";
+        cin >> v;
+        cout << "Enter year: ";
+        cin >> y;
+        cout << "Enter budget: ";
+        cin >> budget;
+        vector<Month> months = {{v, y, budget}};
+        string data = to_json_str(months);
+        save_as_json(data);
+    }
 }
 
 void changeCurrency() {
@@ -366,7 +393,7 @@ int main() {
         cin >> choice;
         
         if (choice == 1) {
-            setBudget();
+            setBudget(month, year);
         }
         else if (choice == 2) {
             addExpense(expenses, categories);
