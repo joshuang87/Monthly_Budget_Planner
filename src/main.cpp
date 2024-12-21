@@ -330,6 +330,17 @@ vector<Month> parse_json(const string& data) {
     return months;
 }
 
+string json_to_str(string path) {
+    ifstream file;
+    file.open(path);
+    string data;
+    string line;
+    while (getline(file, line)) {
+        data += line;
+    }
+    return data;
+}
+
 int main() {
     vector<string> categories = {"Food", "Beverage", "Clothes"};
     vector<vector<double>> expenses(categories.size());
