@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "category": "Food",
+        "amount": 1000,
+        "remarks": "Lunch with friends",
+        "day": 1,
+        "month": 1,
+        "year": 2019
+    },
+    {
+        "id": 2,
+        "category": "Clothes",
+        "amount": 9999,
+        "remarks": "New shoes",
+        "day": 23,
+        "month": 9,
+        "year": 2023
+    }
+]
