@@ -94,7 +94,7 @@ string to_json_str<Month>(const vector<Month>& data) {
     string str_data = "[";
     for (Month month : data) {
         str_data += "{";
-        str_data += "\"month\": " + to_string(month.value) + ",";
+        str_data += "\"value\": " + to_string(month.value) + ",";
         str_data += "\"year\": " + to_string(month.year) + ",";
         str_data += "\"budget\": " + to_string(month.budget);
         if (month != data.back()) {
@@ -207,13 +207,13 @@ vector<Month> parse_json<Month>(const string& json_str) {
 
     while (getline(ss, line, '{')) {
         // Skip non-month entries
-        if (line.find("month") == string::npos) continue;
+        if (line.find("value") == string::npos) continue;
 
         Month m;
         size_t pos;
 
         // Parse month value
-        pos = line.find("month");
+        pos = line.find("value");
         m.value = stoi(line.substr(pos + 7, line.find(",", pos) - pos - 7));
 
         // Parse month year
