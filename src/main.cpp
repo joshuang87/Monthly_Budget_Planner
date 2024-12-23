@@ -72,7 +72,7 @@ void showDate();
 void showMenu();
 void waitEnter();
 void changeCurrency();
-void setBudget(int, int);
+void setBudget(int month, int year);
 void editCategories(vector<string>& cats, vector<vector<double>>& expenses);
 void appSettings(vector<string>& cats, vector<vector<double>>& expenses);
 void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
