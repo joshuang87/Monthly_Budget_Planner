@@ -7,8 +7,9 @@
 #include <limits>
 #include <filesystem>
 #include <fstream>
-#include <type_traits>
-#include <sstream>
+#include <regex>
+#include <array>
+
 using namespace std;
 // Forward declarations for JSON file operations
 std::string read_json_file(const std::string& path);
@@ -18,6 +19,8 @@ template<typename T>
 std::vector<T> parse_json_array(const std::string& data);
 
 // Structure and global variables
+const constexpr array<string, 3> default_categories = {"Food", "Beverage", "Clothes"};
+
 struct Currency {
     string symbol;
     double rate;
