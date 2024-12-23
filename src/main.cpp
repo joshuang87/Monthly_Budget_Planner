@@ -26,15 +26,15 @@ map<string, Currency> currencies = {
     {"EUR", {"€", 0.19}}           // Euro
 };
 
-struct Month {
-    // Value of month
-    int value;
+struct Budget {
+    // amount of budget 
+    double amount;
     int year;
-    double budget;
+    int month;
     
-    // Overloaded != operator for Month struct 
-    bool operator!=(const Month& other) const {
-        return value != other.value || year != other.year || budget != other.budget;
+    // Overloaded != operator for Budget struct 
+    bool operator!=(const Budget& other) const {
+        return amount != other.amount || year != other.year || month != other.month;
     }
 };
 
@@ -84,20 +84,20 @@ template <typename T>
 string to_json_str(const vector<T>& data);
 
 /**
- * @brief Template specialization to convert vector of Month objects to JSON string
- * @param data Vector of Month objects
- * @return std::string JSON formatted string containing month, year and budget data
- * @details Each Month object is formatted as {"month": value, "year": value, "budget": value}
+ * @brief Template specialization to convert vector of Budget objects to JSON string
+ * @param data Vector of Budget objects
+ * @return std::string JSON formatted string containing month, year and amount data
+ * @details Each Budget object is formatted as {"amount": value, "year": value, "month": value}
  */
 template <>
-string to_json_str<Month>(const vector<Month>& data) {
+string to_json_str<Budget>(const vector<Budget>& data) {
     string str_data = "[";
-    for (Month month : data) {
+    for (Budget budget : data) {
         str_data += "{";
-        str_data += "\"value\": " + to_string(month.value) + ",";
-        str_data += "\"year\": " + to_string(month.year) + ",";
-        str_data += "\"budget\": " + to_string(month.budget);
-        if (month != data.back()) {
+        str_data += "\"amount\": " + to_string(budget.amount) + ",";
+        str_data += "\"year\": " + to_string(budget.year) + ",";
+        str_data += "\"month\": " + to_string(budget.month);
+        if (budget != data.back()) {
             str_data += "},";
         } else {
             str_data += "}";
@@ -193,23 +193,23 @@ template <typename T>
 vector<T> parse_json (const string& json_str);
 
 /**
- * @brief Template specialization for parsing Month JSON data
- * @param json_str JSON string containing month data
- * @return vector<Month> Vector of Month objects
+ * @brief Template specialization for parsing Budget JSON data
+ * @param json_str JSON string containing budget data
+ * @return vector<Month> Vector of budget objects
  * @details Expects JSON format:
- *          {"month": int, "year": int, "budget": double}
+ *          {"amount": double, "year": int, "month": int}
  */
 template <>
-vector<Month> parse_json<Month>(const string& json_str) {
-    vector<Month> months;
+vector<Budget> parse_json<Budget>(const string& json_str) {
+    vector<Budget> budgets;
     stringstream ss(json_str);
     string line;
 
     while (getline(ss, line, '{')) {
         // Skip non-month entries
-        if (line.find("value") == string::npos) continue;
+        if (line.find("month") == string::npos) continue;
 
-        Month m;
+        Budget b;
         size_t pos;
 
         // Parse month value
@@ -224,10 +224,10 @@ vector<Month> parse_json<Month>(const string& json_str) {
         pos = line.find("budget");
         m.budget = stod(line.substr(pos + 8, line.find("}", pos) - pos - 8));
 
-        months.push_back(m);
+        budgets.push_back(b);
     }
 
-    return months;
+    return budgets;
 }
 
 /**
@@ -320,16 +320,16 @@ void save_as_json(const vector<T>& data);
 
 
 /**
- * @brief Template specialization for saving Month data to JSON file
- * @param data Vector of Month objects to be saved
- * @details Saves to "data/Month.json" using the Month to JSON string converter
- * @see to_json_str<Month>
+ * @brief Template specialization for saving Budget data to JSON file
+ * @param data Vector of Budget objects to be saved
+ * @details Saves to "data/Budget.json" using the Budget to JSON string converter
+ * @see to_json_str<Budget>
  */
 template <>
-void save_as_json<Month>(const vector<Month>& data) {
+void save_as_json<Budget>(const vector<Budget>& data) {
     ofstream file;
-    file.open("data/Month.json");
-    file << to_json_str<Month>(data);
+    file.open("data/Budget.json");
+    file << to_json_str<Budget>(data);
     file.close();
 }
 
@@ -415,10 +415,10 @@ void initialize_database() {
         filesystem::create_directory("data");
     }
 
-    // Initialize Month.json with empty array if it doesn't exist
-    if (!filesystem::exists("data/Month.json")) {
+    // Initialize Budget.json with empty array if it doesn't exist
+    if (!filesystem::exists("data/Budget.json")) {
         ofstream file;
-        file.open("data/Month.json");
+        file.open("data/Budget.json");
         file << "[]";
         file.close();
     }
@@ -489,9 +489,9 @@ void waitEnter() {
  * 
  * @note Input validation is performed for month to ensure it's within valid range
  */
-Month create_budget() {
+Budget create_budget() {
     int month, year;
-    double budget;
+    double amount;
     cout << "Enter month (1-12): ";
     cin >> month;
     while (month < 1 || month > 12) {
@@ -501,30 +501,30 @@ Month create_budget() {
     cout << "Enter year: ";
     cin >> year;
     cout << "Enter budget: ";
-    cin >> budget;
-    return {month, year, budget};
+    cin >> amount;
+    return {amount, year, month};
 }
 
 void setBudget(int month, int year) {
     system("cls");
 
     // check JSON file exists or not
-    if (filesystem::exists("data/Month.json")) {
+    if (filesystem::exists("data/Budget.json")) {
 
         // parse JSON file to vector of Month
-        vector<Month> months = parse_json<Month>(json_to_str("data/Month.json"));
+        vector<Budget> budgets = parse_json<Budget>(json_to_str("data/Budget.json"));
 
         // if vector is empty but file exists, goto START
-        if (months.empty()) {
+        if (budgets.empty()) {
             goto START;
         }
 
-        for (Month& x : months) {
+        for (Budget& x : budgets) {
 
             // if current month and year already set budget
-            if (x.value == month && x.year == year) {
+            if (x.month == month && x.year == year) {
                 int res;
-                cout << "Budget for this month is already set to " << currentCurrency << fixed << setprecision(2) << " " << x.budget << endl;
+                cout << "Budget for this month is already set to " << currentCurrency << fixed << setprecision(2) << " " << x.amount << endl;
                 showLine();
                 cout << "1. Change budget for this month\n";
                 cout << "2. Set budget for other month\n";
@@ -535,32 +535,32 @@ void setBudget(int month, int year) {
                 
                 if (res == 1) {
                     cout << "Enter new budget for this month: ";
-                    cin >> x.budget;
-                    save_as_json(months);
+                    cin >> x.amount;
+                    save_as_json(budgets);
                     break;
                 }
                 else if (res == 2){
-                    Month new_month = create_budget();
-                    if (new_month.value == x.value && new_month.year == x.year) {
+                    Budget new_budget = create_budget();
+                    if (new_budget.month == x.month && new_budget.year == x.year) {
                         setBudget(month, year);
                         return;
                     }
-                    months.push_back(new_month);
-                    save_as_json(months);
+                    budgets.push_back(new_budget);
+                    save_as_json(budgets);
                     break;
                 }
             }
             else {
-                months.push_back(create_budget());
-                save_as_json(months);
+                budgets.push_back(create_budget());
+                save_as_json(budgets);
                 break;
             }
         }
     }
     else {
         START:
-            vector<Month> months = {create_budget()};
-            save_as_json(months);
+            vector<Budget> budgets = {create_budget()};
+            save_as_json(budgets);
     }
 }
 
