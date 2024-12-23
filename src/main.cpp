@@ -79,6 +79,133 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
 
 /**
+ * @brief Region for JSON parsing functionality - converts JSON strings to C++ structs
+ */
+#pragma region JSON Parsing (JSON String -> C++ Struct)
+
+/**
+ * @brief Generic template function for parsing JSON data into vector of objects
+ * @tparam T Type of object to parse into
+ * @param json_str Input JSON string to be parsed
+ * @return vector<T> Vector of parsed objects
+ */
+template <typename T>
+vector<T> parse_json (const string& json_str);
+
+/**
+ * @brief Template specialization for parsing Month JSON data
+ * @param json_str JSON string containing month data
+ * @return vector<Month> Vector of Month objects
+ * @details Expects JSON format:
+ *          {"month": int, "year": int, "budget": double}
+ */
+template <>
+vector<Month> parse_json<Month>(const string& json_str) {
+    vector<Month> months;
+    stringstream ss(json_str);
+    string line;
+
+    while (getline(ss, line, '{')) {
+        // Skip non-month entries
+        if (line.find("month") == string::npos) continue;
+
+        Month m;
+        size_t pos;
+
+        // Parse month value
+        pos = line.find("month");
+        m.value = stoi(line.substr(pos + 7, line.find(",", pos) - pos - 7));
+
+        // Parse month year
+        pos = line.find("year");
+        m.year = stoi(line.substr(pos + 6, line.find(",", pos) - pos - 6));
+
+        // Parse month budget
+        pos = line.find("budget");
+        m.budget = stod(line.substr(pos + 8, line.find("}", pos) - pos - 8));
+
+        months.push_back(m);
+    }
+
+    return months;
+}
+
+/**
+ * @brief Template specialization for parsing Expense JSON data
+ * @param json_str JSON string containing expense data
+ * @return vector<Expense> Vector of Expense objects
+ * @details Expects JSON format:
+ *          {"id": int, "category": string, "amount": double, 
+ *           "remarks": string, "day": int, "month": int, "year": int}
+ */
+template <>
+vector<Expense> parse_json<Expense>(const string& json_str) {
+    vector<Expense> expenses;
+    stringstream ss(json_str);
+    string line;
+
+    while (getline(ss, line, '{')) {
+        // Skip non-expense entries
+        if (line.find("id") == string::npos) continue;
+
+        Expense e;
+        size_t pos;
+
+        // Parse each field of the expense object
+        pos = line.find("id");
+        e.id = stoi(line.substr(pos + 4, line.find(",", pos) - pos - 4));
+
+        pos = line.find("category");
+        e.category = line.substr(pos + 11, line.find(",", pos) - pos - 12);
+
+        pos = line.find("amount");
+        e.amount = stod(line.substr(pos + 7, line.find(",", pos) - pos - 7));
+
+        pos = line.find("remarks");
+        e.remarks = line.substr(pos + 9, line.find(",", pos) - pos - 10);
+
+        pos = line.find("day");
+        e.day = stoi(line.substr(pos + 5, line.find(",", pos) - pos - 5));
+
+        pos = line.find("month");
+        e.month = stoi(line.substr(pos + 7, line.find(",", pos) - pos - 7));
+
+        pos = line.find("year");
+        e.year = stoi(line.substr(pos + 6, line.find("}", pos) - pos - 6));
+
+        expenses.push_back(e);
+    }
+
+    return expenses;
+}
+
+/**
+ * @brief Template specialization for parsing category JSON data into strings
+ * @param json_str JSON string containing category data
+ * @return vector<string> Vector of category strings
+ * @details Expects JSON format: ["category1", "category2", ...]
+ *          Only accepts alphanumeric categories matching regex: [A-Za-z0-9]+
+ */
+template <>
+vector<string> parse_json<string>(const string& json_str) {
+    vector<string> categories;
+    stringstream ss(json_str);
+    string line;
+    // Regex for alphanumeric validation
+    regex reg(R"(^[A-Za-z0-9]+$)");
+
+    while (getline(ss, line, '\"')) {
+        if (regex_match(line, reg)) {
+            categories.push_back(line);
+        }
+    }
+
+    return categories;
+}
+
+#pragma endregion JSON Parsing (JSON String -> C++ Struct)
+
+/**
  * @brief Region for saving C++ data structures to JSON files
  */
 #pragma region Save Data as JSON (C++ Struct -> JSON)
