@@ -588,16 +588,16 @@ void editBudget() {
     
     // Check if Months.json exists
     if (filesystem::exists("data/Months.json")) {
-        vector<Month> months = parse_json<Month>(json_to_str("data/Month.json"));
+        vector<Budget> months = parse_json<Budget>(json_to_str("data/Month.json"));
         
         //loop through to find the matching month and year
         bool found = false;
-        for (Month& m : months) { 
-            if (m.value == month && m.year == year) {
+        for (Budget& m : months) { 
+            if (m.month == month && m.year == year) {
                 //let user edit it if budget found
                 found = true;
                 cout << "Current budget for " << month << "/" << year 
-                     << " is: " << currentCurrency << fixed << setprecision(2) << m.budget << endl;
+                     << " is: " << currentCurrency << fixed << setprecision(2) << m.amount << endl;
                 
                 double newBudget;
                 cout << "Enter new budget amount: " << currentCurrency << " ";
@@ -608,7 +608,7 @@ void editBudget() {
                 }
 
                 // save the budget in JSON file
-                m.budget = newBudget;
+                m.amount = newBudget;
                 save_as_json(months);
                 cout << "Budget updated!!!" << endl;
                 waitEnter();
@@ -632,7 +632,7 @@ void editBudget() {
                     cin >> newBudget;
                 }
                 // save to json file
-                months.push_back({month, year, newBudget});
+                months.push_back({newBudget, year, month});
                 save_as_json(months);
                 cout << "Budget set successfully!" << endl;
                 waitEnter();
