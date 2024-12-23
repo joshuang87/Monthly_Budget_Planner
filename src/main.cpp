@@ -79,6 +79,23 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
 
 /**
+ * @brief Read a JSON file and return its contents as a string
+ * @param path File path to the JSON file
+ * @return std::string Content of the JSON file
+ * @details Reads the file line by line and concatenates all lines into a single string
+ */
+string json_to_str(string path) {
+    ifstream file;
+    file.open(path);
+    string data;
+    string line;
+    while (getline(file, line)) {
+        data += line;
+    }
+    return data;
+}
+
+/**
  * @brief Initialize the database structure and create empty JSON files if they don't exist
  * @details 
  * - Creates a 'data' directory if it doesn't exist
