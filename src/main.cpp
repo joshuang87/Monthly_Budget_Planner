@@ -79,6 +79,80 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
 
 /**
+ * @brief Region for saving C++ data structures to JSON files
+ */
+#pragma region Save Data as JSON (C++ Struct -> JSON)
+
+/**
+ * @brief Generic template function for saving data to JSON file
+ * @tparam T Type of the data to be saved
+ * @param data Vector of objects to be saved
+ */
+template <typename T>
+void save_as_json(const vector<T>& data);
+
+
+/**
+ * @brief Template specialization for saving Month data to JSON file
+ * @param data Vector of Month objects to be saved
+ * @details Saves to "data/Month.json" using the Month to JSON string converter
+ * @see to_json_str<Month>
+ */
+template <>
+void save_as_json<Month>(const vector<Month>& data) {
+    ofstream file;
+    file.open("data/Month.json");
+    file << to_json_str<Month>(data);
+    file.close();
+}
+
+
+/**
+ * @brief Template specialization for saving Expense data to JSON file
+ * @param data Vector of Expense objects to be saved
+ * @details Saves to "data/Expense.json" using the Expense to JSON string converter
+ * @see to_json_str<Expense>
+ */
+template <>
+void save_as_json<Expense>(const vector<Expense>& data) {
+    ofstream file;
+    file.open("data/Expense.json");
+    file << to_json_str<Expense>(data);
+    file.close();
+}
+
+/**
+ * @brief Template specialization for saving category strings to JSON file
+ * @param data Vector of category strings to be saved
+ * @details Saves to "data/Category.json" using the string to JSON string converter
+ * @see to_json_str<string>
+ */
+template <>
+void save_as_json<string>(const vector<string>& data) {
+    ofstream file;
+    file.open("data/Category.json");
+    file << to_json_str<string>(data);
+    file.close();
+}
+
+/**
+ * @brief Save fixed-size array of strings to JSON file
+ * @tparam N Size of the array
+ * @param data Array of strings to be saved
+ * @details Saves to "data/Category.json" using the array to JSON string converter
+ * @see to_json_str<N>
+ */
+template <size_t N>
+void save_as_json(const array<string, N>& data) {
+    ofstream file;
+    file.open("data/Category.json");
+    file << to_json_str(data);
+    file.close();
+}
+
+#pragma endregion Save Data as JSON (C++ Struct -> JSON)
+
+/**
  * @brief Read a JSON file and return its contents as a string
  * @param path File path to the JSON file
  * @return std::string Content of the JSON file
