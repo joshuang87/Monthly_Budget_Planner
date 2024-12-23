@@ -487,25 +487,31 @@ void waitEnter() {
     cin.get();
 }
 
-void setBudget(int month, int year) {
-    system("cls");
-    cout << endl << "Set Budget" << endl;
-    showLine();
-    
-    // enter month and year
-    int input_month, input_year;
+/**
+ * @brief Create a new monthly budget by getting user input
+ * @return Month struct containing the budget information
+ * 
+ * @details Prompts user for:
+ * - Month (validates for range 1-12)
+ * - Year
+ * - Budget amount
+ * 
+ * @note Input validation is performed for month to ensure it's within valid range
+ */
+Month create_budget() {
+    int month, year;
+    double budget;
     cout << "Enter month (1-12): ";
-    cin >> input_month;
-    while (input_month < 1 || input_month > 12) {
+    cin >> month;
+    while (month < 1 || month > 12) {
         cout << "Invalid month! Enter again (1-12): ";
-        cin >> input_month;
-    }// Check if budget exists
-    
+        cin >> month;
+    }
     cout << "Enter year: ";
-    cin >> input_year;
-    while (input_year < 2000) {
-        cout << "Invalid year! Enter again (>= 2000): ";
-        cin >> input_year;
+    cin >> year;
+    cout << "Enter budget: ";
+    cin >> budget;
+    return {month, year, budget};
     }
     
     if (filesystem::exists("data/Months.json")) {
