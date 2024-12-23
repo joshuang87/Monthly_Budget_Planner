@@ -22,28 +22,38 @@ struct Currency {
     string symbol;
     double rate;
 };
-// Global currency map with exchange rates
+
 map<string, Currency> currencies = {
     {"MYR", {"RM", 1.0}},          //malaysia ringgit
     {"USD", {"$", 0.21}},          //Us Dollar
     {"EUR", {"€", 0.19}}           // Euro
 };
-// Structure to store expense records
-struct Expense {
-    int category_id;
-    double amount;
-    string date;
-};
-// Structure to store monthly budget
+
 struct Month {
     // Value of month
     int value;
     int year;
     double budget;
     
-    // Overloaded != operator for Month struct/ // Compare two Month objects
+    // Overloaded != operator for Month struct 
     bool operator!=(const Month& other) const {
         return value != other.value || year != other.year || budget != other.budget;
+    }
+};
+
+struct Expense
+{
+    int id;
+    string category;
+    double amount;
+    string remarks;
+    int day;
+    int month;
+    int year;
+
+    // Overloaded != operator for Expense struct 
+    bool operator!=(const Expense& other) const {
+        return id != other.id || category != other.category || amount != other.amount || remarks != other.remarks || day != other.day || month != other.month || year != other.year;
     }
 };
 
