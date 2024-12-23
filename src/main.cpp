@@ -79,6 +79,115 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
 
 /**
+ * @brief Region for C++ structs data formatting functionally - converts C++ structs to JSON strings
+ */
+#pragma region Format Struct Data as JSON String
+
+/**
+ * @brief Convert vector of data to JSON string format
+ * @tparam T The type of elements in the vector
+ * @param data Vector containing the data to be converted
+ * @return std::string JSON formatted string representation
+ */
+template <typename T>
+string to_json_str(const vector<T>& data);
+
+/**
+ * @brief Template specialization to convert vector of Month objects to JSON string
+ * @param data Vector of Month objects
+ * @return std::string JSON formatted string containing month, year and budget data
+ * @details Each Month object is formatted as {"month": value, "year": value, "budget": value}
+ */
+template <>
+string to_json_str<Month>(const vector<Month>& data) {
+    string str_data = "[";
+    for (Month month : data) {
+        str_data += "{";
+        str_data += "\"month\": " + to_string(month.value) + ",";
+        str_data += "\"year\": " + to_string(month.year) + ",";
+        str_data += "\"budget\": " + to_string(month.budget);
+        if (month != data.back()) {
+            str_data += "},";
+        } else {
+            str_data += "}";
+        }
+    }
+    str_data += "]";
+    return str_data;
+}
+
+/**
+ * @brief Template specialization to convert vector of Expense objects to JSON string
+ * @param data Vector of Expense objects
+ * @return std::string JSON formatted string containing expense details
+ * @details Each Expense object is formatted as 
+ * {"id": value, "category": "value", "amount": value, "remarks": "value", 
+ *  "day": value, "month": value, "year": value}
+ */
+template <>
+string to_json_str<Expense>(const vector<Expense>& data) {
+    string str_data = "[";
+    for (Expense expense : data) {
+        str_data += "{";
+        str_data += "\"id\": " + to_string(expense.id) + ",";
+        str_data += "\"category\": \"" + expense.category + "\",";
+        str_data += "\"amount\": " + to_string(expense.amount) + ",";
+        str_data += "\"remarks\": \"" + expense.remarks + "\",";
+        str_data += "\"day\": " + to_string(expense.day) + ",";
+        str_data += "\"month\": " + to_string(expense.month) + ",";
+        str_data += "\"year\": " + to_string(expense.year);
+        if (expense != data.back()) {
+            str_data += "},";
+        } else {
+            str_data += "}";
+        }
+    }
+    str_data += "]";
+    return str_data;
+}
+
+/**
+ * @brief Template specialization to convert vector of strings to JSON string
+ * @param data Vector of strings
+ * @return std::string JSON formatted array of strings
+ * @details Output format: ["string1","string2",...,"stringN"]
+ */
+template <>
+string to_json_str<string>(const vector<string>& data) {
+    string str_data = "[";
+    for (int i = 0; i < data.size(); i++) {
+        str_data += "\"" + data[i] + "\"";
+        if (i != data.size() - 1) {
+            str_data += ",";
+        }
+    }
+    str_data += "]";
+    return str_data;
+}
+
+/**
+ * @brief Convert fixed-size array of strings to JSON string
+ * @tparam N Size of the array
+ * @param data Array of strings
+ * @return std::string JSON formatted array of strings
+ * @details Output format: ["string1","string2",...,"stringN"]
+ */
+template <size_t N>
+string to_json_str(const array<string, N>& data) {
+    string str_data = "[";
+    for (int i = 0; i < data.size(); i++) {
+        str_data += "\"" + data[i] + "\"";
+        if (i != data.size() - 1) {
+            str_data += ",";
+        }
+    }
+    str_data += "]";
+    return str_data;
+}
+
+#pragma endregion Format Struct Data as JSON String
+
+/**
  * @brief Region for JSON parsing functionality - converts JSON strings to C++ structs
  */
 #pragma region JSON Parsing (JSON String -> C++ Struct)
