@@ -212,17 +212,17 @@ vector<Budget> parse_json<Budget>(const string& json_str) {
         Budget b;
         size_t pos;
 
-        // Parse month value
-        pos = line.find("value");
-        m.value = stoi(line.substr(pos + 7, line.find(",", pos) - pos - 7));
+        // Parse budget amount
+        pos = line.find("amount");
+        b.amount = stod(line.substr(pos + 9, line.find(",", pos) - pos - 9));
 
-        // Parse month year
+        // Parse year
         pos = line.find("year");
-        m.year = stoi(line.substr(pos + 6, line.find(",", pos) - pos - 6));
+        b.year = stoi(line.substr(pos + 6, line.find(",", pos) - pos - 6));
 
-        // Parse month budget
-        pos = line.find("budget");
-        m.budget = stod(line.substr(pos + 8, line.find("}", pos) - pos - 8));
+        // Parse month 
+        pos = line.find("month");
+        b.month = stoi(line.substr(pos + 8, line.find("}", pos) - pos - 8));
 
         budgets.push_back(b);
     }
