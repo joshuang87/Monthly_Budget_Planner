@@ -11,12 +11,6 @@
 #include <array>
 
 using namespace std;
-// Forward declarations for JSON file operations
-std::string read_json_file(const std::string& path);
-template<typename T>
-void save_json_file(const std::string& path, const std::vector<T>& items);
-template<typename T>
-std::vector<T> parse_json_array(const std::string& data);
 
 // Structure and global variables
 const constexpr array<string, 3> default_categories = {"Food", "Beverage", "Clothes"};
@@ -62,12 +56,6 @@ struct Expense
 
 string currentCurrency = "MYR";
 double budget = 0;  // Added budget variable
-
-template<typename T>// Generic JSON parser interface
-struct JsonParser {
-    static T parse(const std::string& json_str);
-    static std::string to_json(const T& obj);
-};
 
 // Function declarations
 void showLine();
@@ -473,7 +461,7 @@ void showMenu() {
     system("cls");
     cout << endl << "Monthly Budget Planner" << endl;
     showLine();
-    cout << "Current ";
+    cout << "Current ";                 
     showDate();
     showLine();
     cout << "1. Set Budget" << endl;
@@ -515,57 +503,66 @@ Month create_budget() {
     cout << "Enter budget: ";
     cin >> budget;
     return {month, year, budget};
-    }
-    
-    if (filesystem::exists("data/Months.json")) {
-        string json_data = read_json_file("data/Months.json");
-        vector<Month> months = parse_json_array<Month>(json_data);
-        
-        // check if recorded
-        for (Month x : months) {
-            if (x.value == input_month && x.year == input_year) {
-                cout << "Budget for " << input_month << "/" << input_year 
-                     << " is already set to " << currentCurrency 
-                     << fixed << setprecision(2) << x.budget << endl;
-                budget = x.budget;  // 设置全局budget
-                waitEnter();
-                return;
-            }
-        }
-        
-        // if not yet add budget
-        double new_budget;
-        cout << "Enter budget amount: " << currencies[currentCurrency].symbol << " ";
-        cin >> new_budget;
-        while (new_budget < 0) {
-            cout << "Invalid amount! Enter again: " << currencies[currentCurrency].symbol << " ";
-            cin >> new_budget;
-        }
-        
-        budget = new_budget;
-        months.push_back({input_month, input_year, new_budget});
-        save_json_file("data/Months.json", months);
-        cout << "Budget set successfully!" << endl;
-        waitEnter();
-        
-    } else {
-        // create new budget amount
-        double new_budget;
-        cout << "Enter budget amount: " << currencies[currentCurrency].symbol << " ";
-        cin >> new_budget;
-        while (new_budget < 0) {
-            cout << "Invalid amount! Enter again: " << currencies[currentCurrency].symbol << " ";
-            cin >> new_budget;
-        }
-        
-        budget = new_budget;
-        vector<Month> months = {{input_month, input_year, new_budget}};
-        save_json_file("data/Months.json", months);
-        cout << "Budget set successfully!" << endl;
-        waitEnter();
-    }
 }
 
+void setBudget(int month, int year) {
+    system("cls");
+
+    // check JSON file exists or not
+    if (filesystem::exists("data/Month.json")) {
+
+        // parse JSON file to vector of Month
+        vector<Month> months = parse_json<Month>(json_to_str("data/Month.json"));
+
+        // if vector is empty but file exists, goto START
+        if (months.empty()) {
+            goto START;
+        }
+
+        for (Month& x : months) {
+
+            // if current month and year already set budget
+            if (x.value == month && x.year == year) {
+                int res;
+                cout << "Budget for this month is already set to " << currentCurrency << fixed << setprecision(2) << " " << x.budget << endl;
+                showLine();
+                cout << "1. Change budget for this month\n";
+                cout << "2. Set budget for other month\n";
+                showLine();
+                cout << "Enter your choice: ";
+                cin >> res;
+                system("cls");
+                
+                if (res == 1) {
+                    cout << "Enter new budget for this month: ";
+                    cin >> x.budget;
+                    save_as_json(months);
+                    break;
+                }
+                else if (res == 2){
+                    Month new_month = create_budget();
+                    if (new_month.value == x.value && new_month.year == x.year) {
+                        setBudget(month, year);
+                        return;
+                    }
+                    months.push_back(new_month);
+                    save_as_json(months);
+                    break;
+                }
+            }
+            else {
+                months.push_back(create_budget());
+                save_as_json(months);
+                break;
+            }
+        }
+    }
+    else {
+        START:
+            vector<Month> months = {create_budget()};
+            save_as_json(months);
+    }
+}
 
 void changeCurrency() {
     system("cls");
@@ -669,15 +666,6 @@ void appSettings(vector<string>& cats, vector<vector<double>>& expenses) {
 
 void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
     char addMore;
-    string expense_file = "data/Expenses.json";
-    vector<Expense> all_expenses;
-    
-    // Load existing expenses if file exists
-    if (filesystem::exists(expense_file)) {
-        string json_data = read_json_file(expense_file);
-        all_expenses = parse_json_array<Expense>(json_data);
-    }
-
     do {
         system("cls");
         cout << endl << "Record Expenses" << endl;
@@ -728,24 +716,7 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
             }
         }
 
-        // date on time
-        time_t now = time(0);
-        tm* ltm = localtime(&now);
-        string date = to_string(1900 + ltm->tm_year) + "-" + 
-                     to_string(1 + ltm->tm_mon) + "-" + 
-                     to_string(ltm->tm_mday);
-
-        // create new expense
-        Expense new_expense{
-            catNum - 1,  // category_id
-            amount / curr.rate,
-            date
-        };
-        
-        // save the json file
-        all_expenses.push_back(new_expense);
         expenses[catNum - 1].push_back(amount / curr.rate);
-        save_json_file(expense_file, all_expenses);
         
         cout << endl << "Add another? (y/n): ";
         cin >> addMore;
@@ -770,7 +741,7 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
         cout << cats[i] << ": " << curr.symbol 
              << setprecision(2) << (catTotal * curr.rate) << endl;
     }
-
+    
     showLine();
     cout << "Total: " << curr.symbol 
          << setprecision(2) << (total * curr.rate) << endl;
@@ -808,10 +779,10 @@ vector<string> category_init() {
         if (categories.empty()) {
             categories = vector<string>(default_categories.begin(), default_categories.end());
             save_as_json(default_categories);
-    }
-}
-    // If file doesn't exist, create new with default categories 
-    else {
+        }
+    } 
+     // If file doesn't exist, create new with default categories
+     else {
         categories = vector<string>(default_categories.begin(), default_categories.end());
         save_as_json(default_categories);
     }
@@ -830,29 +801,6 @@ int main() {
 
     vector<vector<double>> expenses(categories.size());
     int choice;
-    
-    
-    if (filesystem::exists("data/Months.json")) {
-        string json_data = read_json_file("data/Months.json");
-        vector<Month> months = parse_json_array<Month>(json_data);
-        for (const Month& m : months) {
-            if (m.value == month && m.year == year) {
-                budget = m.budget;
-                break;
-            }
-        }
-    }
-    
-    if (filesystem::exists("data/Expenses.json")) {
-        string json_data = read_json_file("data/Expenses.json");
-        vector<Expense> all_expenses = parse_json_array<Expense>(json_data);
-    
-        for (const auto& expense : all_expenses) {
-            if (expense.category_id >= 0 && expense.category_id < expenses.size()) {
-                expenses[expense.category_id].push_back(expense.amount);
-            }
-        }
-    }
     
     do {
         showMenu();
