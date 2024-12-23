@@ -77,16 +77,60 @@ void editCategories(vector<string>& cats, vector<vector<double>>& expenses);
 void appSettings(vector<string>& cats, vector<vector<double>>& expenses);
 void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
-// Basic line separator for UI
+
+/**
+ * @brief Initialize the database structure and create empty JSON files if they don't exist
+ * @details 
+ * - Creates a 'data' directory if it doesn't exist
+ * - Creates empty JSON files for Month, Expense, and Category data
+ * - Each file is initialized with an empty array "[]"
+ * 
+ * File structure created:
+ * - data/
+ *   - Month.json
+ *   - Expense.json
+ *   - Category.json
+ */
+void initialize_database() {
+    // Create data directory if it doesn't exist
+    if (!filesystem::exists("data")) {
+        filesystem::create_directory("data");
+    }
+
+    // Initialize Month.json with empty array if it doesn't exist
+    if (!filesystem::exists("data/Month.json")) {
+        ofstream file;
+        file.open("data/Month.json");
+        file << "[]";
+        file.close();
+    }
+
+    // Initialize Expense.json with empty array if it doesn't exist
+    if (!filesystem::exists("data/Expense.json")) {
+        ofstream file;
+        file.open("data/Expense.json");
+        file << "[]";
+        file.close();
+    }
+
+    // Initialize Category.json with empty array if it doesn't exist
+    if (!filesystem::exists("data/Category.json")) {
+        ofstream file;
+        file.open("data/Category.json");
+        file << "[]";
+        file.close();
+    }
+}
+
 void showLine() {
     cout << "----------------------------------------" << endl;
 }
-// Get current system date
+
 tm* get_current_date() {
     time_t t = time(0);
     return localtime(&t);
 }
-// Show current date in YYYY-MM-DD format
+
 void showDate() {
     tm* now = get_current_date();
     cout << "Current Date: ";
@@ -209,7 +253,7 @@ void changeCurrency() {
     }
     waitEnter();
 }
-//edit Categories
+
 void editCategories(vector<string>& cats, vector<vector<double>>& expenses) {
     while (true) {
         system("cls");
@@ -371,7 +415,7 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
         cin >> addMore;
     } while (addMore == 'y' || addMore == 'Y');
 }
-// Show expense summary by category
+
 void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses) {
     system("cls");
     cout << endl << "Expenses Summary" << endl;
@@ -379,14 +423,14 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
     
     Currency curr = currencies[currentCurrency];
     double total = 0;
-    // Calculate totals for each category
+
     for (int i = 0; i < cats.size(); i++) {
         double catTotal = 0;
         for (double exp : expenses[i]) {
             catTotal += exp;
         }
         total += catTotal;
-        // Show total expenses
+        
         cout << cats[i] << ": " << curr.symbol 
              << setprecision(2) << (catTotal * curr.rate) << endl;
     }
@@ -440,9 +484,7 @@ vector<string> category_init() {
 }
 
 int main() {
-    if (!filesystem::exists("data")) {
-        filesystem::create_directory("data");
-    }
+    initialize_database();
     
     tm* current_date = get_current_date();
     const int month = current_date->tm_mon + 1;
