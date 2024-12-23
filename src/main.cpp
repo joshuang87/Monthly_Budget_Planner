@@ -695,6 +695,7 @@ void editCategories(vector<string>& cats, vector<vector<double>>& expenses) {
             getline(cin, newCat);
             cats.push_back(newCat);
             expenses.push_back(vector<double>());
+            save_as_json(cats); 
             cout << "Category added!" << endl;
         }
         else if (choice == 2) {
@@ -705,6 +706,7 @@ void editCategories(vector<string>& cats, vector<vector<double>>& expenses) {
                 if (num >= 1 && num <= cats.size()) {
                     cats.erase(cats.begin() + num - 1);
                     expenses.erase(expenses.begin() + num - 1);
+                    save_as_json(cats); 
                     cout << "Category removed!" << endl;
                 }
             } else {
