@@ -391,150 +391,42 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
         cout << "Remaining: " << curr.symbol << setprecision(2) << remaining << endl;
     }
 }
-// Parse JSON string into Expense object
-template<>
-struct JsonParser<Expense> {
-    static Expense parse(const std::string& line) {
-        Expense e;
-        size_t pos;
 
-        pos = line.find("category_id");
-        e.category_id = std::stoi(line.substr(pos + 12, line.find(",", pos) - pos - 12));
-
-        pos = line.find("amount");
-        e.amount = std::stod(line.substr(pos + 8, line.find(",", pos) - pos - 8));
-
-        pos = line.find("date");
-        size_t start = line.find("\"", pos) + 1;
-        size_t end = line.find("\"", start);
-        e.date = line.substr(start, end - start);
-
-        return e;
-    }
-
-    static std::string to_json(const Expense& expense) {
-        std::string json = "{";
-        json += "\"category_id\": " + std::to_string(expense.category_id) + ",";
-        json += "\"amount\": " + std::to_string(expense.amount) + ",";
-        json += "\"date\": \"" + expense.date + "\"";
-        json += "}";
-        return json;
-    }
-};
-
-template<>
-struct JsonParser<Month> {
-    static Month parse(const std::string& line) {
-        Month m;
-        size_t pos;
-
-        pos = line.find("month");
-        m.value = std::stoi(line.substr(pos + 7, line.find(",", pos) - pos - 7));
-
-        pos = line.find("year");
-        m.year = std::stoi(line.substr(pos + 6, line.find(",", pos) - pos - 6));
-
-        pos = line.find("budget");
-        m.budget = std::stod(line.substr(pos + 8, line.find("}", pos) - pos - 8));
-
-        return m;
-    }
-
-    static std::string to_json(const Month& month) {
-        std::string json = "{";
-        json += "\"month\": " + std::to_string(month.value) + ",";
-        json += "\"year\": " + std::to_string(month.year) + ",";
-        json += "\"budget\": " + std::to_string(month.budget);
-        json += "}";
-        return json;
-    }
-};
-
-// Generic JSON array parser
-template<typename T>
-std::vector<T> parse_json_array(const std::string& data) {
-    std::vector<T> items;
-    std::stringstream ss(data);
-    std::string line;
-
-    while (std::getline(ss, line, '{')) {
-        if (line.find(":") == std::string::npos) continue;
-        items.push_back(JsonParser<T>::parse(line));
-    }
-
-    return items;
-}
-
-// Generic JSON array serializer
-template<typename T>
-std::string to_json_array(const std::vector<T>& items) {
-    std::string json = "[";
-    for (size_t i = 0; i < items.size(); ++i) {
-        json += JsonParser<T>::to_json(items[i]);
-        if (i < items.size() - 1) {
-            json += ",";
-        }
-    }
-    json += "]";
-    return json;
-}
-
-// File operations
-std::string read_json_file(const std::string& path) {
-    try {
-        std::ifstream file(path);
-        if (!file.is_open()) {
-            throw std::runtime_error("Unable to open file: " + path);
-        }
-        std::stringstream buffer;
-        buffer << file.rdbuf();
-        return buffer.str();
-    } catch (const std::exception& e) {
-        std::cerr << "Error reading file: " << e.what() << std::endl;
-        return "[]";  
+/**
+ * @brief Initialize expense categories, either from existing file or default values
+ * @return vector<string> Vector containing expense categories
+ * 
+ * @details Function follows this logic:
+ * 1. If Category.json exists:
+ *    - Reads and parses existing categories
+ *    - If file is empty, loads default categories
+ * 2. If Category.json doesn't exist:
+ *    - Creates new file with default categories
+ * 
+ * @note Default categories are loaded from default_categories array
+ * @see default_categories
+ * @see save_as_json
+ * @see parse_json
+ */
+vector<string> category_init() {
+    vector<string> categories;
+    // Check if category file exists
+    if (filesystem::exists("data/Category.json")) {
+        // Read and parse existing categories
+        categories = parse_json<string>(json_to_str("data/Category.json"));
+        // If file is empty, use default categories
+        if (categories.empty()) {
+            categories = vector<string>(default_categories.begin(), default_categories.end());
+            save_as_json(default_categories);
     }
 }
-
-template<typename T>
-void save_json_file(const std::string& path, const std::vector<T>& items) {
-    try {
-        std::ofstream file(path);
-        if (!file.is_open()) {
-            throw std::runtime_error("Unable to open file for writing: " + path);
-        }
-        file << to_json_array(items);
-        file.close();
-    } catch (const std::exception& e) {
-        std::cerr << "Error saving file: " << e.what() << std::endl;
+    // If file doesn't exist, create new with default categories 
+    else {
+        categories = vector<string>(default_categories.begin(), default_categories.end());
+        save_as_json(default_categories);
     }
-}
 
-// Usage example for Month struct
-void example_usage() {
-    // Reading and parsing
-    std::string json_data = read_json_file("data/Months.json");
-    std::vector<Month> months = parse_json_array<Month>(json_data);
-
-    // Saving
-    save_json_file("data/Months.json", months);
-}
-
-string json_to_str(string path) {
-    ifstream file;
-    file.open(path);
-    string data;
-    string line;
-    while (getline(file, line)) {
-        data += line;
-    }
-    return data;
-}
-
-void save_as_json(string data) {
-    ofstream file;
-    file.open("data/Months.json");
-    file << data;
-    file.close();
+    return categories;
 }
 
 int main() {
@@ -546,7 +438,8 @@ int main() {
     const int month = current_date->tm_mon + 1;
     const int year = current_date->tm_year + 1900;
 
-    vector<string> categories = {"Food", "Beverage", "Clothes"};
+    vector<string> categories = category_init();
+
     vector<vector<double>> expenses(categories.size());
     int choice;
     
