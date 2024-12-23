@@ -13,7 +13,7 @@
 using namespace std;
 
 // Structure and global variables
-const constexpr array<string, 3> default_categories = {"Food", "Beverage", "Clothes"};
+array<string, 3> default_categories = {"Food", "Beverage", "Clothes"};
 
 struct Currency {
     string symbol;
@@ -467,7 +467,8 @@ void showMenu() {
     cout << "1. Set Budget" << endl;
     cout << "2. Make Expenses Record" << endl;
     cout << "3. App Setting" << endl;
-    cout << "4. Exit" << endl;
+    cout << "4. Edit Budget" << endl;
+    cout << "5. Exit" << endl;
     showLine();
     cout << "Enter your choice: ";
 }
@@ -561,6 +562,85 @@ void setBudget(int month, int year) {
         START:
             vector<Budget> budgets = {create_budget()};
             save_as_json(budgets);
+    }
+}
+
+void editBudget() {
+    system("cls");
+    cout << endl << "Edit Budget" << endl;
+    showLine();
+    
+    // prompt user key the month and year
+    int month, year;
+    cout << "Enter month (1-12) to edit budget: ";
+    cin >> month;
+    while (month < 1 || month > 12) {
+        cout << "Invalid month! Enter again (1-12): ";
+        cin >> month;
+    }
+    
+    cout << "Enter year: ";
+    cin >> year;
+    while (year < 2000) {
+        cout << "Invalid year! Enter again (>= 2000): ";
+        cin >> year;
+    }
+    
+    // Check if Months.json exists
+    if (filesystem::exists("data/Months.json")) {
+        vector<Month> months = parse_json<Month>(json_to_str("data/Month.json"));
+        
+        //loop through to find the matching month and year
+        bool found = false;
+        for (Month& m : months) { 
+            if (m.value == month && m.year == year) {
+                //let user edit it if budget found
+                found = true;
+                cout << "Current budget for " << month << "/" << year 
+                     << " is: " << currentCurrency << fixed << setprecision(2) << m.budget << endl;
+                
+                double newBudget;
+                cout << "Enter new budget amount: " << currentCurrency << " ";
+                cin >> newBudget;
+                while (newBudget < 0) { //validate the input
+                    cout << "Invalid amount! Enter again: " << currentCurrency << " ";
+                    cin >> newBudget;
+                }
+
+                // save the budget in JSON file
+                m.budget = newBudget;
+                save_as_json(months);
+                cout << "Budget updated!!!" << endl;
+                waitEnter();
+                break;
+            }
+        }
+
+        // let user set budget for future if not found
+        if (!found) {
+            cout << "No budget found for " << month << "/" << year << "." << endl;
+            char addNewBudget;
+            cout << "Would you like to set a new budget for this month? (y/n): ";
+            cin >> addNewBudget;
+
+            if (addNewBudget == 'y' || addNewBudget == 'Y') {
+                double newBudget;
+                cout << "Enter new budget amount: " << currentCurrency << " ";
+                cin >> newBudget;
+                while (newBudget < 0) {
+                    cout << "Invalid amount! Enter again: " << currentCurrency << " ";
+                    cin >> newBudget;
+                }
+                // save to json file
+                months.push_back({month, year, newBudget});
+                save_as_json(months);
+                cout << "Budget set successfully!" << endl;
+                waitEnter();
+            }
+        }
+    } else {
+        cout << "No budget data found!" << endl;
+        waitEnter();
     }
 }
 
@@ -815,12 +895,15 @@ int main() {
         else if (choice == 3) {
             appSettings(categories, expenses);
         }
-        else if (choice == 4) {
+        else if (choice == 4){
+            editBudget();
+        }
+        else if (choice == 5) {
             showSummary(categories, expenses);
             cout << endl << "Goodbye!" << endl;
         }
         
-    } while (choice != 4);
+    } while (choice != 5);
     
     return 0;
 }
