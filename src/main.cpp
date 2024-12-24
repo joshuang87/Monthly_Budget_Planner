@@ -587,8 +587,8 @@ void editBudget() {
     }
     
     // Check if Months.json exists
-    if (filesystem::exists("data/Months.json")) {
-        vector<Budget> months = parse_json<Budget>(json_to_str("data/Month.json"));
+    if (filesystem::exists("data/Budget.json")) {
+        vector<Budget> months = parse_json<Budget>(json_to_str("data/Budget.json"));
         
         //loop through to find the matching month and year
         bool found = false;
