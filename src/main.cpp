@@ -587,8 +587,8 @@ void editBudget() {
     }
     
     // Check if Months.json exists
-    if (filesystem::exists("data/Months.json")) {
-        vector<Budget> months = parse_json<Budget>(json_to_str("data/Month.json"));
+    if (filesystem::exists("data/Budget.json")) {
+        vector<Budget> months = parse_json<Budget>(json_to_str("data/Budget.json"));
         
         //loop through to find the matching month and year
         bool found = false;
@@ -747,6 +747,19 @@ void appSettings(vector<string>& cats, vector<vector<double>>& expenses) {
 }
 
 void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
+
+    // read from the json file 
+    vector<Expense> expenseRecords;
+    if (filesystem::exists("data/Expense.json")) {
+        expenseRecords = parse_json<Expense>(json_to_str("data/Expense.json"));
+    }
+
+    // calc the newID for the record
+    int newId = 1;
+    if (!expenseRecords.empty()) {
+        newId = expenseRecords.back().id + 1; //access the id from the last records from the vector and +1
+    }
+
     char addMore;
     do {
         system("cls");
@@ -786,10 +799,23 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
             }
         }
 
+        tm* now = get_current_date();
+        //get current month's budget
+        double currentBudget = 0;
+        if (filesystem::exists("data/Budget.json")) {
+            vector<Budget> budgets = parse_json<Budget>(json_to_str("data/Budget.json"));
+            for (const auto& b : budgets) {
+                if (b.month == (now->tm_mon + 1) && b.year == (now->tm_year + 1900)) {
+                    currentBudget = b.amount;
+                    break;
+                }
+            }
+        }
+
         // Budget warning check
-        if (budget > 0 && (totalExpense * curr.rate) > budget) {
+        if (currentBudget > 0 && (totalExpense * curr.rate) > currentBudget) {
             cout << "\nWARNING: This expense will exceed your budget of "
-                 << curr.symbol << fixed << setprecision(2) << budget << "!\n";
+                 << curr.symbol << fixed << setprecision(2) << currentBudget << "!\n";
             cout << "Do you want to continue? (y/n): ";
             char confirm;
             cin >> confirm;
@@ -800,8 +826,31 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
 
         expenses[catNum - 1].push_back(amount / curr.rate);
         
+        
+        // Get remarks for the expense
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        string remarks;
+        cout << "Enter remarks: ";
+        getline(cin, remarks);
+
+        // create the new expense record to be added
+        Expense newExpense{
+            newId++,
+            cats[catNum - 1], //category
+            amount,
+            remarks,
+            now->tm_mday,
+            now->tm_mon + 1,
+            now->tm_year + 1900
+        };
+
+        //add to expense records and save to json file
+        expenseRecords.push_back(newExpense);
+        save_as_json(expenseRecords);
+
         cout << endl << "Add another? (y/n): ";
         cin >> addMore;
+
     } while (addMore == 'y' || addMore == 'Y');
 }
 
@@ -828,9 +877,21 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
     cout << "Total: " << curr.symbol 
          << setprecision(2) << (total * curr.rate) << endl;
     
-    if (budget > 0) {
-        cout << "Budget: " << curr.symbol << setprecision(2) << budget << endl;
-        double remaining = budget - (total * curr.rate);
+    tm* now = get_current_date();
+    double currentBudget = 0;
+    if (filesystem::exists("data/Budget.json")) {
+            vector<Budget> budgets = parse_json<Budget>(json_to_str("data/Budget.json"));
+            for (const auto& b : budgets) {
+                if (b.month == (now->tm_mon + 1) && b.year == (now->tm_year + 1900)) {
+                    currentBudget = b.amount;
+                    break;
+                }
+            }
+        }
+
+    if (currentBudget > 0) {
+        cout << "Budget: " << curr.symbol << setprecision(2) << currentBudget << endl;
+        double remaining = currentBudget - (total * curr.rate);
         cout << "Remaining: " << curr.symbol << setprecision(2) << remaining << endl;
     }
 }
