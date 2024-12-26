@@ -747,6 +747,19 @@ void appSettings(vector<string>& cats, vector<vector<double>>& expenses) {
 }
 
 void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
+
+    // read from the json file 
+    vector<Expense> expenseRecords;
+    if (filesystem::exists("data/Expense.json")) {
+        expenseRecords = parse_json<Expense>(json_to_str("data/Expense.json"));
+    }
+
+    // calc the newID for the record
+    int newId = 1;
+    if (!expenseRecords.empty()) {
+        newId = expenseRecords.back().id + 1; //access the id from the last records from the vector and +1
+    }
+
     char addMore;
     do {
         system("cls");
@@ -800,8 +813,32 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
 
         expenses[catNum - 1].push_back(amount / curr.rate);
         
+        tm* now = get_current_date();
+        
+        // Get remarks for the expense
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        string remarks;
+        cout << "Enter remarks: ";
+        getline(cin, remarks);
+
+        // create the new expense record to be added
+        Expense newExpense{
+            newId++,
+            cats[catNum - 1], //category
+            amount,
+            remarks,
+            now->tm_mday,
+            now->tm_mon + 1,
+            now->tm_year + 1900
+        };
+
+        //add to expense records and save to json file
+        expenseRecords.push_back(newExpense);
+        save_as_json(expenseRecords);
+
         cout << endl << "Add another? (y/n): ";
         cin >> addMore;
+
     } while (addMore == 'y' || addMore == 'Y');
 }
 
