@@ -259,7 +259,7 @@ vector<Expense> parse_json<Expense>(const string& json_str) {
         e.category = line.substr(pos + 11, line.find(",", pos) - pos - 12);
 
         pos = line.find("amount");
-        e.amount = stod(line.substr(pos + 7, line.find(",", pos) - pos - 7));
+        e.amount = stod(line.substr(pos + 9, line.find(",", pos) - pos - 9));
 
         pos = line.find("remarks");
         e.remarks = line.substr(pos + 9, line.find(",", pos) - pos - 10);
