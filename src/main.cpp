@@ -441,6 +441,25 @@ void initialize_database() {
 }
 
 /**
+ * @brief Checks if a given string represents a valid number.
+ * 
+ * This function iterates through each character of the input string to verify if it is a digit or a decimal point.
+ * If any character is not a digit or a decimal point, the function returns false.
+ * 
+ * @param input The string to be checked.
+ * @return true If the string represents a valid number.
+ * @return false If the string does not represent a valid number.
+ */
+bool isNumber(string input) {
+    for (char c : input) {
+        if (!isdigit(c) && c != '.') {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
  * @brief Checks if a budget exists for a given month and year.
  * 
  * This function reads budget data from a JSON file and parses it into a vector of Budget objects.
