@@ -480,29 +480,64 @@ void waitEnter() {
 }
 
 /**
- * @brief Create a new monthly budget by getting user input
- * @return Month struct containing the budget information
+ * @brief Creates a budget by prompting the user for month, year, and amount.
  * 
- * @details Prompts user for:
- * - Month (validates for range 1-12)
- * - Year
- * - Budget amount
+ * This function interacts with the user to input a valid month (1-12), year, and budget amount.
+ * It validates the inputs to ensure they are numbers and within the expected ranges.
+ * The budget amount is rounded to two decimal places.
  * 
- * @note Input validation is performed for month to ensure it's within valid range
+ * @return Budget A Budget object containing the amount, year, and month.
  */
 Budget create_budget() {
+    string month_input, year_input, amount_input;
     int month, year;
     double amount;
+    do {
     cout << "Enter month (1-12): ";
-    cin >> month;
-    while (month < 1 || month > 12) {
-        cout << "Invalid month! Enter again (1-12): ";
-        cin >> month;
+        cin >> month_input;
+        if (!isNumber(month_input)) {
+            cout << "Invalid input! Please enter again.";
+            showLine();
+            waitEnter();
+            continue;
+        }
+        month = stoi(month_input);
+        if (month < 1 || month > 12) {
+            cout << "Invalid month input! Please enter again.";
+            showLine();
+            waitEnter();
+            continue;
     }
+        break;
+
+    } while (true);
+
+    do {
     cout << "Enter year: ";
-    cin >> year;
+        cin >> year_input;
+        if (!isNumber(year_input)) {
+            cout << "Invalid input! Please enter again.";
+            showLine();
+            waitEnter();
+            continue;
+        }
+        year = stoi(year_input);
+        break;
+    } while (true);
+
+    do {
     cout << "Enter budget: ";
-    cin >> amount;
+        cin >> amount_input;
+        if (!isNumber(amount_input)) {
+            cout << "Invalid input! Please enter again.";
+            showLine();
+            waitEnter();
+            continue;
+        }
+        amount = round(stod(amount_input) * 100) / 100;
+        break;
+    } while (true);
+
     return {amount, year, month};
 }
 
