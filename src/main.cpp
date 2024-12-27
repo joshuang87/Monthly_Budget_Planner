@@ -890,9 +890,9 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
         }
 
     if (currentBudget > 0) {
-        cout << "Budget: " << curr.symbol << setprecision(2) << currentBudget << endl;
+        cout << "Budget: " << curr.symbol << fixed << setprecision(2) << currentBudget << endl;
         double remaining = currentBudget - (total * curr.rate);
-        cout << "Remaining: " << curr.symbol << setprecision(2) << remaining << endl;
+        cout << "Remaining: " << curr.symbol << fixed << setprecision(2) << remaining << endl;
     }
 }
 
