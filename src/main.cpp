@@ -620,60 +620,99 @@ Budget create_budget() {
 
 void setBudget(int month, int year) {
     system("cls");
-
     // check JSON file exists or not
     if (filesystem::exists("data/Budget.json")) {
-
         // parse JSON file to vector of Month
         vector<Budget> budgets = parse_json<Budget>(json_to_str("data/Budget.json"));
-
         // if vector is empty but file exists, goto START
         if (budgets.empty()) {
             goto START;
         }
 
         for (Budget& x : budgets) {
-
             // if current month and year already set budget
             if (x.month == month && x.year == year) {
-                int res;
+                string res_input;
                 cout << "Budget for this month is already set to " << currentCurrency << fixed << setprecision(2) << " " << x.amount << endl;
                 showLine();
                 cout << "1. Change budget for this month\n";
                 cout << "2. Set budget for other month\n";
+                cout << "3. Back\n";
                 showLine();
                 cout << "Enter your choice: ";
-                cin >> res;
+                cin >> res_input;
                 system("cls");
+
+                if (isNumber(res_input)) {
+                    int res = stoi(res_input);
                 
                 if (res == 1) {
                     cout << "Enter new budget for this month: ";
                     cin >> x.amount;
                     save_as_json(budgets);
-                    break;
+                        showLine();
+                        cout << "Budget updated!!!" << endl;
+                        waitEnter();
+                        return;
                 }
                 else if (res == 2){
                     Budget new_budget = create_budget();
                     if (new_budget.month == x.month && new_budget.year == x.year) {
+                            setBudget(month, year);
+                            showLine();
+                            cout << "Budget saved!!!" << endl;
+                            return;
+                        }
+                        else if (isBudgetExists(new_budget.month, new_budget.year)) {
+                            cout << "Budget for " << new_budget.month << "/" << new_budget.year << " already set!" << endl;
+                            waitEnter();
                         setBudget(month, year);
                         return;
                     }
                     budgets.push_back(new_budget);
                     save_as_json(budgets);
-                    break;
+                        showLine();
+                        cout << "Budget saved!!!" << endl;
+                        waitEnter();
+                        return;
+                    }
+                    else if (res == 3) {
+                        waitEnter();
+                        return;
+                    }
+                    else {
+                        cout << "Invalid choice!" << endl;
+                        waitEnter();
+                        setBudget(month, year);
+                        return;
+                    }
+                }
+                else {
+                    cout << "Invalid choice!" << endl;
+                    waitEnter();
+                    setBudget(month, year);
+                    return;
                 }
             }
             else {
                 budgets.push_back(create_budget());
                 save_as_json(budgets);
-                break;
+                showLine();
+                cout << "Budget saved!!!" << endl;
+                waitEnter();
+                return;
             }
         }
     }
     else {
         START:
             vector<Budget> budgets = {create_budget()};
+            currentBudget = budgets[0].amount;
             save_as_json(budgets);
+            showLine();
+            cout << "Budget saved!!!" << endl;
+            waitEnter();
+            return;
     }
 }
 
@@ -722,6 +761,7 @@ void editBudget() {
                 // save the budget in JSON file
                 m.amount = newBudget;
                 save_as_json(months);
+                showLine();
                 cout << "Budget updated!!!" << endl;
                 waitEnter();
                 break;
