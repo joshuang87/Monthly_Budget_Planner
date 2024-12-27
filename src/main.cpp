@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <iomanip>
+#include <cmath>
 #include <ctime>
 #include <string>
 #include <limits>
@@ -57,22 +58,7 @@ struct Expense
 string currentCurrency = "MYR";
 double currentBudget;
 
-// Function declarations
-void showLine();
-void showDate();
-void showMenu();
-void waitEnter();
-void changeCurrency();
-void setBudget(int month, int year);
-void editCategories(vector<string>& cats, vector<vector<double>>& expenses);
-void appSettings(vector<string>& cats, vector<vector<double>>& expenses);
-void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
-void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses);
-
-/**
- * @brief Region for C++ structs data formatting functionally - converts C++ structs to JSON strings
- */
-#pragma region Format Struct Data as JSON String
+#pragma region Function declarations
 
 /**
  * @brief Convert vector of data to JSON string format
@@ -82,6 +68,49 @@ void showSummary(const vector<string>& cats, const vector<vector<double>>& expen
  */
 template <typename T>
 string to_json_str(const vector<T>& data);
+
+/**
+ * @brief Generic template function for parsing JSON data into vector of objects
+ * @tparam T Type of object to parse into
+ * @param json_str Input JSON string to be parsed
+ * @return vector<T> Vector of parsed objects
+ */
+template <typename T>
+vector<T> parse_json (const string& json_str);
+
+/**
+ * @brief Generic template function for saving data to JSON file
+ * @tparam T Type of the data to be saved
+ * @param data Vector of objects to be saved
+ */
+template <typename T>
+void save_as_json(const vector<T>& data);
+
+string json_to_str(string path);
+void initialize_database();
+void initialize_current_budget(const int& month, const int& year);
+bool isNumber(string);
+bool isBudgetExists(int month, int year);
+void showLine();
+tm* get_current_date();
+void showDate();
+void showMenu();
+void waitEnter();
+void setBudget(int month, int year);
+void editBudget();
+void changeCurrency();
+void editCategories(vector<string>& cats, vector<vector<double>>& expenses);
+void appSettings(vector<string>& cats, vector<vector<double>>& expenses);
+void addExpense(vector<vector<double>>& expenses, const vector<string>& cats);
+void showSummary(const int& month, const int& year);
+vector<string> category_init();
+
+#pragma endregion Function declarations
+
+/**
+ * @brief Region for C++ structs data formatting functionally - converts C++ structs to JSON strings
+ */
+#pragma region Format Struct Data as JSON String
 
 /**
  * @brief Template specialization to convert vector of Budget objects to JSON string
@@ -182,15 +211,6 @@ string to_json_str(const array<string, N>& data) {
  * @brief Region for JSON parsing functionality - converts JSON strings to C++ structs
  */
 #pragma region JSON Parsing (JSON String -> C++ Struct)
-
-/**
- * @brief Generic template function for parsing JSON data into vector of objects
- * @tparam T Type of object to parse into
- * @param json_str Input JSON string to be parsed
- * @return vector<T> Vector of parsed objects
- */
-template <typename T>
-vector<T> parse_json (const string& json_str);
 
 /**
  * @brief Template specialization for parsing Budget JSON data
@@ -309,15 +329,6 @@ vector<string> parse_json<string>(const string& json_str) {
  * @brief Region for saving C++ data structures to JSON files
  */
 #pragma region Save Data as JSON (C++ Struct -> JSON)
-
-/**
- * @brief Generic template function for saving data to JSON file
- * @tparam T Type of the data to be saved
- * @param data Vector of objects to be saved
- */
-template <typename T>
-void save_as_json(const vector<T>& data);
-
 
 /**
  * @brief Template specialization for saving Budget data to JSON file
@@ -927,7 +938,6 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
 
         expenses[catNum - 1].push_back(amount / curr.rate);
         
-        
         // Get remarks for the expense
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         string remarks;
@@ -951,7 +961,6 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
 
         cout << endl << "Add another? (y/n): ";
         cin >> addMore;
-
     } while (addMore == 'y' || addMore == 'Y');
 }
 
