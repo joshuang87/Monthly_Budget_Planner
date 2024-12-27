@@ -55,7 +55,7 @@ struct Expense
 };
 
 string currentCurrency = "MYR";
-double budget = 0;  // Added budget variable
+double currentBudget;
 
 // Function declarations
 void showLine();
@@ -437,6 +437,31 @@ void initialize_database() {
         file.open("data/Category.json");
         file << "[]";
         file.close();
+    }
+}
+
+/**
+ * @brief Initializes the current budget for a given month and year.
+ * 
+ * This function checks if a budget exists for the specified month and year.
+ * If the budget does not exist, it sets the current budget to 0.
+ * If the budget exists, it parses the budget data from a JSON file and sets the current budget to the corresponding amount.
+ * 
+ * @param month The month for which to initialize the budget.
+ * @param year The year for which to initialize the budget.
+ */
+void initialize_current_budget(const int& month, const int& year) {
+    if (!isBudgetExists(month, year)) {
+        currentBudget = 0;
+        return;
+    }
+
+    vector<Budget> budgets = parse_json<Budget>(json_to_str("data/Budget.json"));
+    for (Budget budget : budgets) {
+        if (budget.month == month && budget.year == year) {
+            currentBudget = budget.amount;
+            return;
+        }
     }
 }
 
