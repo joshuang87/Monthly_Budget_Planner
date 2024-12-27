@@ -1004,45 +1004,40 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
     } while (addMore == 'y' || addMore == 'Y');
 }
 
-void showSummary(const vector<string>& cats, const vector<vector<double>>& expenses) {
+void showSummary(const int& month, const int& year) {
     system("cls");
     cout << endl << "Expenses Summary" << endl;
     showLine();
     
+    if (!(filesystem::exists("data/Expense.json"))) {
+        cout << "No any expenses recorded!" << endl;
+        return;
+    }
+
+    vector<Expense> expenses = parse_json<Expense>(json_to_str("data/Expense.json"));
+    if (expenses.empty()) {
+        cout << "No any expenses recorded!" << endl;
+        return;
+    }
+    
     Currency curr = currencies[currentCurrency];
     double total = 0;
-
-    for (int i = 0; i < cats.size(); i++) {
-        double catTotal = 0;
-        for (double exp : expenses[i]) {
-            catTotal += exp;
+    cout << "| " << left << setw(3) << "ID" << " | " << setw(10) << "Category" << " | " << setw(7) << "Amount" << " | " << setw(17) << "Remarks" << " | " << setw(10) << "Date" << " |" << endl;
+    showLine();
+    for (Expense data : expenses) {
+        if (data.month == month && data.year == year) {
+            cout << "| " << left << setw(3) << data.id << " | " << setw(10) << data.category << " | " << setw(7) << fixed << setprecision(2) << data.amount << " | " << setw(17) << data.remarks << " | " << data.year << "-" << data.month << "-" << data.day << " |" << endl;
+            total += data.amount;
         }
-        total += catTotal;
-        
-        cout << cats[i] << ": " << curr.symbol 
-             << setprecision(2) << (catTotal * curr.rate) << endl;
     }
     
     showLine();
-    cout << "Total: " << curr.symbol 
-         << setprecision(2) << (total * curr.rate) << endl;
-    
-    tm* now = get_current_date();
-    double currentBudget = 0;
-    if (filesystem::exists("data/Budget.json")) {
-            vector<Budget> budgets = parse_json<Budget>(json_to_str("data/Budget.json"));
-            for (const auto& b : budgets) {
-                if (b.month == (now->tm_mon + 1) && b.year == (now->tm_year + 1900)) {
-                    currentBudget = b.amount;
-                    break;
-                }
-            }
-        }
+    cout << "Total: " << curr.symbol << fixed << setprecision(2) << (total * curr.rate) << endl;
 
     if (currentBudget > 0) {
-        cout << "Budget: " << curr.symbol << setprecision(2) << currentBudget << endl;
+        cout << "Budget: " << curr.symbol << fixed << setprecision(2) << currentBudget << endl;
         double remaining = currentBudget - (total * curr.rate);
-        cout << "Remaining: " << curr.symbol << setprecision(2) << remaining << endl;
+        cout << "Remaining: " << curr.symbol << fixed << setprecision(2) << remaining << endl;
     }
 }
 
@@ -1084,11 +1079,12 @@ vector<string> category_init() {
 }
 
 int main() {
-    initialize_database();
-    
     tm* current_date = get_current_date();
     const int month = current_date->tm_mon + 1;
     const int year = current_date->tm_year + 1900;
+
+    initialize_database();
+    initialize_current_budget(month, year);
 
     vector<string> categories = category_init();
 
@@ -1112,7 +1108,7 @@ int main() {
             editBudget();
         }
         else if (choice == 5) {
-            showSummary(categories, expenses);
+            showSummary(month, year);
             cout << endl << "Goodbye!" << endl;
         }
         
