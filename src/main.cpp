@@ -440,8 +440,30 @@ void initialize_database() {
     }
 }
 
+/**
+ * @brief Checks if a budget exists for a given month and year.
+ * 
+ * This function reads budget data from a JSON file and parses it into a vector of Budget objects.
+ * It then iterates through the vector to check if any budget matches the specified month and year.
+ * 
+ * @param month The month to check for an existing budget.
+ * @param year The year to check for an existing budget.
+ * @return true If a budget exists for the specified month and year.
+ * @return false If no budget exists for the specified month and year.
+ */
+bool isBudgetExists(int month, int year) {
+    string data_str = json_to_str("data/Budget.json");
+    vector<Budget> budgets = parse_json<Budget>(data_str);
+    for (Budget budget : budgets) {
+        if (budget.month == month && budget.year == year) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void showLine() {
-    cout << "----------------------------------------" << endl;
+    cout << "--------------------------------------------------------------" << endl;
 }
 
 tm* get_current_date() {
