@@ -50,7 +50,7 @@ struct Expense
     int year;
 
     // Overloaded != operator for Expense struct 
-    bool operator!=(const Expense& other) const {
+    bool operator!=(const Expense& other) const { 
         return id != other.id || category != other.category || amount != other.amount || remarks != other.remarks || day != other.day || month != other.month || year != other.year;
     }
 };
@@ -175,7 +175,7 @@ string to_json_str<Expense>(const vector<Expense>& data) {
 template <>
 string to_json_str<string>(const vector<string>& data) {
     string str_data = "[";
-    for (int i = 0; i < data.size(); i++) {
+    for (size_t i = 0; i < data.size(); i++) {
         str_data += "\"" + data[i] + "\"";
         if (i != data.size() - 1) {
             str_data += ",";
@@ -195,7 +195,7 @@ string to_json_str<string>(const vector<string>& data) {
 template <size_t N>
 string to_json_str(const array<string, N>& data) {
     string str_data = "[";
-    for (int i = 0; i < data.size(); i++) {
+    for (size_t i = 0; i < data.size(); i++) {
         str_data += "\"" + data[i] + "\"";
         if (i != data.size() - 1) {
             str_data += ",";
@@ -276,13 +276,13 @@ vector<Expense> parse_json<Expense>(const string& json_str) {
         e.id = stoi(line.substr(pos + 4, line.find(",", pos) - pos - 4));
 
         pos = line.find("category");
-        e.category = line.substr(pos + 11, line.find(",", pos) - pos - 12);
+        e.category = line.substr(pos + 12, line.find(",", pos) - pos - 13);
 
         pos = line.find("amount");
         e.amount = stod(line.substr(pos + 9, line.find(",", pos) - pos - 9));
 
         pos = line.find("remarks");
-        e.remarks = line.substr(pos + 9, line.find(",", pos) - pos - 10);
+        e.remarks = line.substr(pos + 11, line.find(",", pos) - pos - 12);
 
         pos = line.find("day");
         e.day = stoi(line.substr(pos + 5, line.find(",", pos) - pos - 5));
@@ -570,7 +570,7 @@ Budget create_budget() {
     int month, year;
     double amount;
     do {
-    cout << "Enter month (1-12): ";
+        cout << "Enter month (1-12): ";
         cin >> month_input;
         if (!isNumber(month_input)) {
             cout << "Invalid input! Please enter again.";
@@ -584,13 +584,13 @@ Budget create_budget() {
             showLine();
             waitEnter();
             continue;
-    }
+        }
         break;
 
     } while (true);
 
     do {
-    cout << "Enter year: ";
+        cout << "Enter year: ";
         cin >> year_input;
         if (!isNumber(year_input)) {
             cout << "Invalid input! Please enter again.";
@@ -603,7 +603,7 @@ Budget create_budget() {
     } while (true);
 
     do {
-    cout << "Enter budget: ";
+        cout << "Enter budget: ";
         cin >> amount_input;
         if (!isNumber(amount_input)) {
             cout << "Invalid input! Please enter again.";
@@ -645,19 +645,19 @@ void setBudget(int month, int year) {
 
                 if (isNumber(res_input)) {
                     int res = stoi(res_input);
-                
-                if (res == 1) {
-                    cout << "Enter new budget for this month: ";
-                    cin >> x.amount;
-                    save_as_json(budgets);
+
+                    if (res == 1) {
+                        cout << "Enter new budget for this month: ";
+                        cin >> x.amount;
+                        save_as_json(budgets);
                         showLine();
                         cout << "Budget updated!!!" << endl;
                         waitEnter();
                         return;
-                }
-                else if (res == 2){
-                    Budget new_budget = create_budget();
-                    if (new_budget.month == x.month && new_budget.year == x.year) {
+                    }
+                    else if (res == 2){
+                        Budget new_budget = create_budget();
+                        if (new_budget.month == x.month && new_budget.year == x.year) {
                             setBudget(month, year);
                             showLine();
                             cout << "Budget saved!!!" << endl;
@@ -666,11 +666,11 @@ void setBudget(int month, int year) {
                         else if (isBudgetExists(new_budget.month, new_budget.year)) {
                             cout << "Budget for " << new_budget.month << "/" << new_budget.year << " already set!" << endl;
                             waitEnter();
-                        setBudget(month, year);
-                        return;
-                    }
-                    budgets.push_back(new_budget);
-                    save_as_json(budgets);
+                            setBudget(month, year);
+                            return;
+                        }
+                        budgets.push_back(new_budget);
+                        save_as_json(budgets);
                         showLine();
                         cout << "Budget saved!!!" << endl;
                         waitEnter();
@@ -692,7 +692,7 @@ void setBudget(int month, int year) {
                     waitEnter();
                     setBudget(month, year);
                     return;
-                }
+                } 
             }
             else {
                 budgets.push_back(create_budget());
@@ -977,7 +977,7 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
         }
 
         expenses[catNum - 1].push_back(amount / curr.rate);
-        
+
         // Get remarks for the expense
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
         string remarks;
@@ -998,7 +998,7 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
         //add to expense records and save to json file
         expenseRecords.push_back(newExpense);
         save_as_json(expenseRecords);
-
+        
         cout << endl << "Add another? (y/n): ";
         cin >> addMore;
     } while (addMore == 'y' || addMore == 'Y');
@@ -1008,7 +1008,7 @@ void showSummary(const int& month, const int& year) {
     system("cls");
     cout << endl << "Expenses Summary" << endl;
     showLine();
-    
+
     if (!(filesystem::exists("data/Expense.json"))) {
         cout << "No any expenses recorded!" << endl;
         return;
@@ -1058,7 +1058,7 @@ void showSummary(const int& month, const int& year) {
  * @see parse_json
  */
 vector<string> category_init() {
-    vector<string> categories;
+    vector<string> categories;              
     // Check if category file exists
     if (filesystem::exists("data/Category.json")) {
         // Read and parse existing categories
