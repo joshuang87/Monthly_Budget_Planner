@@ -573,14 +573,14 @@ Budget create_budget() {
         cout << "Enter month (1-12): ";
         cin >> month_input;
         if (!isNumber(month_input)) {
-            cout << "Invalid input! Please enter again.";
+            cout << "Invalid input! Please enter again.\n";
             showLine();
             waitEnter();
             continue;
         }
         month = stoi(month_input);
         if (month < 1 || month > 12) {
-            cout << "Invalid month input! Please enter again.";
+            cout << "Invalid month input! Please enter again.\n";
             showLine();
             waitEnter();
             continue;
@@ -593,7 +593,7 @@ Budget create_budget() {
         cout << "Enter year: ";
         cin >> year_input;
         if (!isNumber(year_input)) {
-            cout << "Invalid input! Please enter again.";
+            cout << "Invalid input! Please enter again.\n";
             showLine();
             waitEnter();
             continue;
@@ -606,7 +606,7 @@ Budget create_budget() {
         cout << "Enter budget: ";
         cin >> amount_input;
         if (!isNumber(amount_input)) {
-            cout << "Invalid input! Please enter again.";
+            cout << "Invalid input! Please enter again.\n";
             showLine();
             waitEnter();
             continue;
