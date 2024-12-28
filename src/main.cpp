@@ -648,7 +648,16 @@ void setBudget(int month, int year) {
 
                     if (res == 1) {
                         cout << "Enter new budget for this month: ";
-                        cin >> x.amount;
+                        string newAmount;
+                        do {
+                            cin >> newAmount;
+                            if (!isNumber(newAmount)) {
+                                cout << "Invalid input! Please enter again: ";
+                                continue;
+                            }
+                            break;
+                        }while (true);
+                        x.amount = round(stod(newAmount) * 100) / 100;
                         save_as_json(budgets);
                         showLine();
                         cout << "Budget updated!!!" << endl;
@@ -952,17 +961,6 @@ void addExpense(vector<vector<double>>& expenses, const vector<string>& cats) {
         }
 
         tm* now = get_current_date();
-        //get current month's budget
-        double currentBudget = 0;
-        if (filesystem::exists("data/Budget.json")) {
-            vector<Budget> budgets = parse_json<Budget>(json_to_str("data/Budget.json"));
-            for (const auto& b : budgets) {
-                if (b.month == (now->tm_mon + 1) && b.year == (now->tm_year + 1900)) {
-                    currentBudget = b.amount;
-                    break;
-                }
-            }
-        }
 
         // Budget warning check
         if (currentBudget > 0 && (totalExpense * curr.rate) > currentBudget) {
